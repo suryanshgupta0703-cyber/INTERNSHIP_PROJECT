@@ -278,14 +278,8 @@ export class ATSEngine {
                 }) as TransformerModel;
                 console.log(`[ATSEngine] ✅ Semantic model loaded (${modelConfig.source})`);
             } catch (error) {
-                console.error(`[ATSEngine] Failed to load semantic model, trying alternative path:`, error);
-                // Try without the full path for standard HF models
-                const simpleModelName = semanticModelUrl.split('/').pop() || semanticModelUrl;
-                this.model = await pipeline('feature-extraction', simpleModelName, {
-                    quantized: true,
-                    device: 'wasm'
-                }) as TransformerModel;
-                console.log(`[ATSEngine] ✅ Semantic model loaded with simple name (${modelConfig.source})`);
+                console.error(`[ATSEngine] Failed to load semantic model:`, error);
+                throw error;
             }
 
             this.emit('statusUpdate', 'Loading classifier...');

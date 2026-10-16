@@ -119,10 +119,11 @@ async function initializeATSEngine(): Promise<ATSWorkerClient> {
             }
         });
 
-        appState.atsWorker.on('error', () => {
-            // Error is handled by predictAtsScore catch block
+        appState.atsWorker.on('error', (data: unknown) => {
+            const message = typeof data === 'string' ? data : 'AI model failed to load';
+            showError(message);
+            updateStatus('AI model failed to load', 'error');
 
-            // Hide mobile status on error
             if (isMobileDevice()) {
                 appState.mobileStatus.hide();
             }
@@ -163,8 +164,10 @@ async function initializeATSEngine(): Promise<ATSWorkerClient> {
             updateStatus('Analysis complete', 'ready');
         });
 
-        // Initialize the worker
-        await appState.atsWorker.initialize(ATS_CONFIG);
+        const initResult = await appState.atsWorker.initialize(ATS_CONFIG);
+        if (!initResult.success) {
+            throw new Error('AI models failed to load. Refresh the page to retry.');
+        }
 
         return appState.atsWorker;
 

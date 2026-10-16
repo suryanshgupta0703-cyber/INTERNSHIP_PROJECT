@@ -35,10 +35,10 @@ export function getModelConfig(): ModelConfig {
 
     const isLocal = modelSource === 'local';
 
-    // Use HuggingFace directly - it has proper CORS for Xenova models
-    // The Xenova models are designed to work in browser environments
-    const remoteHost = isLocal ? '' : (import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co');
-    const remotePathTemplate = isLocal ? '' : '{model}/resolve/main/';
+    // Production fetches models through the same-origin Worker proxy so the
+    // browser never hits huggingface.co (CORS + service worker interception).
+    const remoteHost = isLocal ? '' : getRemoteHost();
+    const remotePathTemplate = isLocal ? '' : 'models-proxy/{model}/resolve/main/';
 
     // Base configuration with hardcoded fallbacks for production
     const config: ModelConfig = {
@@ -88,8 +88,7 @@ function getPaths(_isLocal: boolean): ModelPaths {
         domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
     }
 
-    // Use HuggingFace directly - Xenova models have proper CORS headers
-    const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
+    const baseUrl = isProduction ? `${getRemoteHost()}/models-proxy` : (import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co');
 
     console.log('[ModelConfig] Model paths:', {
         semanticModelName,
@@ -145,4 +144,17 @@ export function getOnnxModelUrls(): {
 export function getWeightsUrl(): string {
     const config = getModelConfig();
     return config.paths.weightsPath;
+}
+
+function getRemoteHost(): string {
+    const configured = import.meta.env.VITE_MODEL_BASE_URL;
+    if (configured && /^https?:\/\//.test(configured) && !configured.includes('huggingface.co')) {
+        return configured.replace(/\/$/, '');
+    }
+
+    if (typeof globalThis !== 'undefined' && 'location' in globalThis && globalThis.location?.origin) {
+        return globalThis.location.origin;
+    }
+
+    return '';
 }

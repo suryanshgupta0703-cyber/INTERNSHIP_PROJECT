@@ -1,5 +1,4 @@
-const CACHE_NAME = 'ats-analyzer-cache-v1';
-// Only cache static assets that exist in both dev and production
+const CACHE_NAME = 'ats-analyzer-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -15,7 +14,6 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('[ServiceWorker] Opened cache:', CACHE_NAME);
-        // Add files one by one to handle failures gracefully
         return Promise.allSettled(
           urlsToCache.map(url =>
             cache.add(url).catch(err => {
@@ -26,12 +24,11 @@ self.addEventListener('install', event => {
       })
       .then(() => {
         console.log('[ServiceWorker] Installation complete');
-        return self.skipWaiting(); // Activate immediately
+        return self.skipWaiting();
       })
   );
 });
 
-// Clean up old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -45,19 +42,31 @@ self.addEventListener('activate', event => {
       );
     }).then(() => {
       console.log('[ServiceWorker] Activated');
-      return self.clients.claim(); // Take control immediately
+      return self.clients.claim();
     })
   );
 });
 
 self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  const url = new URL(request.url);
+
+  // Never intercept cross-origin model/CDN downloads (Hugging Face, WASM, etc.).
+  // Fetching them from the SW strips CORS and is what blocked AI init in production.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Model proxy must hit the Worker, not the SW cache.
+  if (url.pathname.startsWith('/models-proxy/')) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
+    caches.match(request).then(response => response || fetch(request))
   );
 });
