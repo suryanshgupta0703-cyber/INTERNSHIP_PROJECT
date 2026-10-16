@@ -134,6 +134,7 @@ class ATSWorker implements ATSWorkerAPI {
             const modelInfo = this.engine.getModelInfo();
 
             // Notify main thread that initialization is complete
+            console.log('[ATSWorker] Sending ready event to main thread:', { modelInfo, initTime });
             self.postMessage({
                 type: 'ready',
                 modelInfo,

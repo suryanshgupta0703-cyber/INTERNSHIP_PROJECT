@@ -6,14 +6,10 @@
 // Import PDF.js for local PDF processing with proper types
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker properly for both development and production
-// The worker needs to be loaded from the same origin due to SharedArrayBuffer requirements
-const workerUrl = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url
-).toString();
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+// Configure PDF.js worker
+// Use CDN for reliable deployment across all environments
+const pdfjsVersion = '5.7.284';
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.mjs`;
 (window as any).pdfjsLib = pdfjsLib;
 
 // Import styles
@@ -126,6 +122,7 @@ async function initializeATSEngine(): Promise<ATSWorkerClient> {
         });
 
         appState.atsWorker.on('ready', (data: unknown) => {
+            console.log('[Main] Ready event received:', data);
             const info = data as any;
             appState.isEngineReady = true;
 
@@ -135,6 +132,7 @@ async function initializeATSEngine(): Promise<ATSWorkerClient> {
             updateStatus('ATS Engine ready', 'ready');
 
             if (elements.predictBtn) {
+                console.log('[Main] Enabling predict button');
                 (elements.predictBtn as HTMLButtonElement).disabled = false;
             }
             if (elements.statusDot) {

@@ -17,7 +17,13 @@
     "download-models": "node scripts/download-models.js",
     "setup:local": "npm run download-models"
   },
-  "keywords": ["ats", "resume", "analyzer", "ai", "privacy"],
+  "keywords": [
+    "ats",
+    "resume",
+    "analyzer",
+    "ai",
+    "privacy"
+  ],
   "author": "Suryansh Gupta",
   "license": "Apache-2.0",
   "devDependencies": {
@@ -42,7 +48,7 @@
     "compromise": "^14.14.4",
     "email-regex": "^6.1.0",
     "onnxruntime-web": "1.22.0-dev.20250409-89f8206ba4",
-    "pdfjs-dist": "^5.1.91"
+    "pdfjs-dist": "^5.7.284"
   },
   "overrides": {
     "onnxruntime-web": "1.22.0-dev.20250409-89f8206ba4"

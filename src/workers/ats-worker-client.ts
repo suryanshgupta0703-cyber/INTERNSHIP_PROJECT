@@ -198,6 +198,7 @@ export class ATSWorkerClient {
                 break;
 
             case 'ready':
+                console.log('[WorkerClient] Ready event received from worker:', event);
                 if (event.modelInfo && event.initTime !== undefined) {
                     this.emit('ready', {
                         modelInfo: event.modelInfo,
@@ -208,6 +209,8 @@ export class ATSWorkerClient {
                             privacyMode: true
                         }
                     });
+                } else {
+                    console.warn('[WorkerClient] Ready event missing required data:', event);
                 }
                 break;
 

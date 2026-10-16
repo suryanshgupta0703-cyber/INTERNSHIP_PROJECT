@@ -56,32 +56,17 @@ function getPaths(isLocal: boolean): ModelPaths {
     const semanticModelName = import.meta.env.VITE_SEMANTIC_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
     const domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
 
-    if (isLocal) {
-        // Local development - serve from public/models if downloaded, otherwise use remote
-        const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || '/models';
-        const semanticModel = `${baseUrl}/${semanticModelName}`;
-        const domainModel = `${baseUrl}/${domainModelName}`;
+    // For remote mode, just return the model name directly - transformers.js will handle the rest
+    // For local mode, would need custom paths, but we're using remote for now
+    const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
 
-        return {
-            semanticModel,
-            domainModel,
-            baseUrl,
-            onnxBasePath: `${semanticModel}/onnx/`,
-            weightsPath: `${semanticModel}/universal_score_weights.json`
-        };
-    } else {
-        // Remote - Use HuggingFace directly
-        const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
-
-        // For standard HF models, use the model name directly
-        return {
-            semanticModel: semanticModelName,
-            domainModel: domainModelName,
-            baseUrl,
-            onnxBasePath: `${baseUrl}/${semanticModelName}/resolve/main/onnx/`,
-            weightsPath: `${baseUrl}/${semanticModelName}/resolve/main/universal_score_weights.json`
-        };
-    }
+    return {
+        semanticModel: semanticModelName,
+        domainModel: domainModelName,
+        baseUrl,
+        onnxBasePath: `${baseUrl}/${semanticModelName}/resolve/main/onnx/`,
+        weightsPath: `${baseUrl}/${semanticModelName}/resolve/main/universal_score_weights.json`
+    };
 }
 
 /**

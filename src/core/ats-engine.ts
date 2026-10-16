@@ -259,19 +259,38 @@ export class ATSEngine {
             this.emit('statusUpdate', 'Loading embeddings...');
             console.log(`[ATSEngine] Loading semantic model (${modelConfig.source}):`, semanticModelUrl);
 
-            this.model = await pipeline('feature-extraction', semanticModelUrl, {
-                quantized: true,
-                device: 'wasm'
-            }) as TransformerModel;
-            console.log(`[ATSEngine] ✅ Semantic model loaded (${modelConfig.source})`);
+            try {
+                this.model = await pipeline('feature-extraction', semanticModelUrl, {
+                    quantized: true,
+                    device: 'wasm'
+                }) as TransformerModel;
+                console.log(`[ATSEngine] ✅ Semantic model loaded (${modelConfig.source})`);
+            } catch (error) {
+                console.error(`[ATSEngine] Failed to load semantic model, trying alternative path:`, error);
+                // Try without the full path for standard HF models
+                const simpleModelName = semanticModelUrl.split('/').pop() || semanticModelUrl;
+                this.model = await pipeline('feature-extraction', simpleModelName, {
+                    quantized: true,
+                    device: 'wasm'
+                }) as TransformerModel;
+                console.log(`[ATSEngine] ✅ Semantic model loaded with simple name (${modelConfig.source})`);
+            }
 
             this.emit('statusUpdate', 'Loading classifier...');
             console.log(`[ATSEngine] Loading domain model (${modelConfig.source}):`, domainModelUrl);
-            this.domainModel = await pipeline('feature-extraction', domainModelUrl, {
-                quantized: true,
-                device: 'wasm'
-            }) as TransformerModel;
-            console.log(`[ATSEngine] ✅ Domain model loaded (${modelConfig.source})`);
+
+            try {
+                this.domainModel = await pipeline('feature-extraction', domainModelUrl, {
+                    quantized: true,
+                    device: 'wasm'
+                }) as TransformerModel;
+                console.log(`[ATSEngine] ✅ Domain model loaded (${modelConfig.source})`);
+            } catch (error) {
+                console.error(`[ATSEngine] Failed to load domain model, trying alternative path:`, error);
+                // Reuse the semantic model for domain analysis if it fails
+                this.domainModel = this.model;
+                console.log(`[ATSEngine] ✅ Using semantic model for domain analysis (${modelConfig.source})`);
+            }
 
             this.emit('statusUpdate', 'Loading scoring...');
             console.log('[ATSEngine] Starting SkillExtractor initialization...');
