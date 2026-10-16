@@ -4,6 +4,11 @@
  */
 
 import { getElement } from '../utils/dom.ts';
+import { showSuccess, showError } from './alerts.ts';
+import type { ATSAnalysisResult } from '../types';
+
+const SKILL_CHIP_LIMIT = 18;
+let lastAnalysisResult: ATSAnalysisResult | null = null;
 
 interface ProgressStep {
     percent: number;
@@ -184,10 +189,111 @@ export const showModelDetailsModal = (): void => {
     setTimeout(() => overlay.classList.add('active'), 10);
 };
 
+export const renderSkillMatchMap = (result: ATSAnalysisResult): void => {
+    lastAnalysisResult = result;
+    const container = getElement<HTMLElement>('skillAnalysis');
+    if (!container) return;
+
+    const skillMatch = result.skillMatch;
+    const matched = skillMatch?.matched ?? [];
+    const missing = skillMatch?.missing ?? [];
+    const jobCount = skillMatch?.jobSkills.length ?? 0;
+    const foundCount = matched.length;
+    const cover = jobCount > 0 ? Math.round((foundCount / jobCount) * 100) : 0;
+
+    container.innerHTML = `
+        <div class="skill-match-header">
+            <h4 class="skill-match-title">Skill Match Map</h4>
+            <p class="skill-match-meta">${foundCount} of ${jobCount} job skills found on your resume (${cover}%)</p>
+        </div>
+        <div class="skill-analysis-grid">
+            <div class="skill-list-container">
+                <div class="skill-list-title">Matched</div>
+                ${renderSkillChips(matched, 'highlight')}
+            </div>
+            <div class="skill-list-container">
+                <div class="skill-list-title">Missing from resume</div>
+                ${renderSkillChips(missing, 'missing')}
+            </div>
+        </div>
+        <div class="skill-match-actions">
+            <button type="button" class="btn skill-action-btn" id="copyMissingSkillsBtn"${missing.length ? '' : ' disabled'}>
+                Copy missing skills
+            </button>
+            <button type="button" class="btn skill-action-btn skill-action-btn-primary" id="copyScoreCardBtn">
+                Copy score card
+            </button>
+        </div>
+    `;
+
+    getElement<HTMLButtonElement>('copyMissingSkillsBtn')?.addEventListener('click', () => {
+        void copyText(formatMissingSkills(result), 'Missing skills copied');
+    });
+    getElement<HTMLButtonElement>('copyScoreCardBtn')?.addEventListener('click', () => {
+        void copyText(formatScoreCard(result), 'Score card copied');
+    });
+};
+
+function renderSkillChips(skills: string[], variant: 'highlight' | 'missing'): string {
+    if (skills.length === 0) {
+        return '<p class="skill-empty">None detected</p>';
+    }
+
+    const visible = skills.slice(0, SKILL_CHIP_LIMIT);
+    const extra = skills.length - visible.length;
+    const chips = visible
+        .map(skill => `<span class="skill-item ${variant}">${escapeHtml(skill)}</span>`)
+        .join('');
+    const more = extra > 0 ? `<span class="skill-item skill-more">+${extra} more</span>` : '';
+    return `<div class="skill-chip-row">${chips}${more}</div>`;
+}
+
+function formatMissingSkills(result: ATSAnalysisResult): string {
+    const missing = result.skillMatch?.missing ?? [];
+    return missing.length ? missing.join(', ') : 'No missing skills detected.';
+}
+
+function formatScoreCard(result: ATSAnalysisResult): string {
+    const label = result.overallScore >= 80 ? 'Strong match'
+        : result.overallScore >= 70 ? 'Good match'
+        : result.overallScore >= 50 ? 'Fair match'
+        : 'Needs work';
+    const matched = result.skillMatch?.matched ?? [];
+    const missing = result.skillMatch?.missing ?? [];
+
+    return [
+        `ATS Resume Analyzer — ${result.overallScore}/100 (${label})`,
+        `Semantic similarity: ${result.breakdown.semanticMatch.score.toFixed(1)}%`,
+        `Domain compatibility: ${Math.round(result.domainCompatibility ?? 0)}%`,
+        `Skill depth: ${Math.round(result.skillDepth ?? 0)}%`,
+        matched.length ? `Matched skills: ${matched.slice(0, 12).join(', ')}` : 'Matched skills: none detected',
+        missing.length ? `Missing skills: ${missing.slice(0, 12).join(', ')}` : 'Missing skills: none detected',
+        'Generated locally in your browser. No resume data left this device.'
+    ].join('\n');
+}
+
+async function copyText(text: string, successMessage: string): Promise<void> {
+    try {
+        await navigator.clipboard.writeText(text);
+        showSuccess(successMessage);
+    } catch {
+        showError('Could not copy to clipboard');
+    }
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 export default {
     startProgressSimulation,
     updateAnalysisProgress,
     completeProgress,
     resetProgress,
-    showModelDetailsModal
+    showModelDetailsModal,
+    renderSkillMatchMap
 };

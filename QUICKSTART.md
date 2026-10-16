@@ -1,20 +1,20 @@
 # Quick Start Guide
 
-Get ATS Resume Analyzer up and running in minutes.
+Get the ATS Resume Analyzer running locally or deployed to Cloudflare in a few minutes.
+
+---
 
 ## Local Development
 
-### 1. Clone and Install
+### 1. Install dependencies
 
 ```bash
-git clone https://github.com/suryanshgupta0703-cyber/INTERNSHIP_PROJECT.git
-cd INTERNSHIP_PROJECT
 npm install
 ```
 
-### 2. Configure Environment
+### 2. Configure environment
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the project root:
 
 ```bash
 VITE_MODEL_SOURCE=remote
@@ -25,119 +25,85 @@ VITE_DEBUG_MODE=true
 VITE_ENABLE_CACHE=true
 ```
 
-### 3. Start Development Server
+An example file is provided at [`.env.example`](.env.example).
+
+### 3. Start the dev server
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` in your browser.
+Open `http://localhost:3000`.
 
-**Note**: Models are automatically downloaded from HuggingFace on first use. No manual download required.
-
-## Production Deployment
-
-### Quick Deploy to Cloudflare Pages
-
-1. **Push to GitHub**:
-   ```bash
-   git add .
-   git commit -m "Your commit message"
-   git push
-   ```
-
-2. **Deploy on Cloudflare Pages**:
-   - Go to [Cloudflare Pages](https://dash.cloudflare.com/)
-   - Click "Create a project"
-   - Connect your GitHub repository
-   - Build command: `npm run build`
-   - Output directory: `dist`
-   - Environment variables (see below)
-   - Click "Save and Deploy"
-
-### Environment Variables
-
-Add these in Cloudflare Pages dashboard:
-
-```bash
-VITE_MODEL_SOURCE=remote
-VITE_MODEL_BASE_URL=https://huggingface.co
-VITE_SEMANTIC_MODEL_PATH=Xenova/all-MiniLM-L6-v2
-VITE_DOMAIN_MODEL_PATH=Xenova/all-MiniLM-L6-v2
-VITE_DEBUG_MODE=false
-VITE_ENABLE_CACHE=true
-```
-
-## Testing
-
-### Test the Application
-
-1. Open the deployed URL
-2. Paste a sample resume (or use the built-in samples)
-3. Paste a job description
-4. Click "Run AI Analysis"
-5. Wait for the analysis to complete (first load: 10-30s for model download)
-6. Review the results and recommendations
-
-### Sample Resumes
-
-The app includes sample resumes for:
-- Tech professionals
-- Marketing roles
-- Design positions
-- Finance careers
-
-Click "Try a sample" to load these quickly.
-
-### PDF Upload
-
-1. Click "Upload PDF" tab
-2. Upload your resume PDF
-3. Text will be extracted automatically
-4. Proceed with analysis
-
-## Common Issues
-
-### Models not loading?
-- Check your environment variables are set correctly
-- Verify you have an internet connection (models download from HuggingFace)
-- Check browser console for errors
-- Try clearing browser cache
-
-### Build failing?
-- Ensure Node.js v18+ is installed
-- Run `npm install` again
-- Delete `node_modules` and `rm package-lock.json`, then reinstall
-
-### Analysis not working?
-- Wait for models to load (first load takes 10-30 seconds)
-- Check browser console for errors
-- Verify both resume and job description are provided
-- Ensure the text has sufficient length (resume: 50+ chars, job: 30+ chars)
-
-### PDF upload not working?
-- Ensure the PDF is not password-protected
-- Check that the PDF contains selectable text (not scanned images)
-- Try copying text directly instead
-
-## Performance Notes
-
-- **First Load**: 10-30 seconds (model download from HuggingFace)
-- **Subsequent Loads**: <1 second (browser cache)
-- **Analysis Time**: 0.5-2 seconds
-- **Memory Usage**: ~150MB (for model inference)
-
-## Next Steps
-
-- Read the full [README.md](README.md) for project documentation
-- Check [PROJECT_REPORT.md](PROJECT_REPORT.md) for detailed technical report
-- Read [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment options
-- Customize the UI and features as needed
-
-## Live Demo
-
-Try the live application: https://internship-project.suryanshgupta0703.workers.dev
+> Models are downloaded from Hugging Face on first use and cached in the browser. The first load takes 10–30 seconds. Subsequent loads are under 1 second.
 
 ---
 
-**Developed by Suryansh Gupta** | AI/ML Internship Project 2025
+## Running an Analysis
+
+1. **Enter your resume** — paste text in the Resume tab, or use the **Upload PDF** tab to upload a PDF (up to 10 MB).
+2. **Enter the job description** — paste or upload similarly.
+3. Click **Run AI Analysis**.
+4. Wait for model loading (progress shown in real time).
+5. Review your ATS score, matched/missing skills, and recommendations.
+
+Try the **Load Sample** button to test with pre-loaded resume and job description examples.
+
+---
+
+## Deploy to Cloudflare
+
+```bash
+# Build
+npm run build
+
+# Deploy (Wrangler must be authenticated)
+npx wrangler deploy
+```
+
+This deploys a Cloudflare Worker that:
+- Serves the static app from `dist/`
+- Proxies model files from Hugging Face through `/models-proxy/*` to avoid CORS issues
+
+For detailed deployment options, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+---
+
+## Common Issues
+
+### Analysis not running
+- Confirm the model is loading — check the status bar at the top of the page.
+- Resume must be at least 50 characters; job description must be at least 30 characters.
+- Check the browser console for errors.
+
+### Models not loading (production)
+- Verify `npx wrangler deploy` was used (not just `wrangler pages publish`).
+- Check DevTools Network tab — `/models-proxy/` requests should return 200.
+
+### PDF text not extracted
+- The PDF must contain selectable text (not a scanned image).
+- Try opening the PDF in a viewer and copying text manually to verify.
+
+### Build fails
+- Requires Node.js v18 or higher: `node --version`
+- Try `rm -rf node_modules package-lock.json && npm install`
+
+---
+
+## Available Commands
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server on port 3000 |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview the production build |
+| `npm run test:run` | Run tests once |
+| `npm run test` | Run tests in watch mode |
+
+---
+
+## Further Reading
+
+- [README.md](README.md) — Full project documentation and architecture overview
+- [PROJECT_REPORT.md](PROJECT_REPORT.md) — Detailed technical report (scoring logic, ML pipeline, challenges)
+- [DEPLOYMENT.md](DEPLOYMENT.md) — Deployment options and troubleshooting

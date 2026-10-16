@@ -52,4 +52,4 @@ debug-*.js
 
 # Downloaded models for local development (large files, download via npm run download-models)
 public/models/
-!public/models/.gitkeep
+!public/models/.gitkeep*.code-workspace

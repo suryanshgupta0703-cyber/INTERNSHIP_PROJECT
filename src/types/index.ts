@@ -46,6 +46,17 @@ export interface ATSAnalysisResult {
     analysisId: string;
     timestamp: string;
     warnings?: string[];
+    skillMatch?: SkillMatchSummary;
+}
+
+/**
+ * Matched vs missing skills extracted from resume and job text
+ */
+export interface SkillMatchSummary {
+    matched: string[];
+    missing: string[];
+    resumeSkills: string[];
+    jobSkills: string[];
 }
 
 /**

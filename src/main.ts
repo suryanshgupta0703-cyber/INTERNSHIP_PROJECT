@@ -37,7 +37,7 @@ import { debounce } from './utils/helpers.ts';
 import { updateStatus, showError } from './ui/alerts.ts';
 import { switchInputView, switchTab, toggleFAQ, setupKeyboardNavigation, toggleMobileMenu } from './ui/navigation.ts';
 import { openModal, setupModalEventListeners } from './ui/modals.ts';
-import { startProgressSimulation, updateAnalysisProgress, completeProgress, resetProgress, showModelDetailsModal } from './ui/analysis.ts';
+import { startProgressSimulation, updateAnalysisProgress, completeProgress, resetProgress, showModelDetailsModal, renderSkillMatchMap } from './ui/analysis.ts';
 
 // Import services
 import { loadSampleResume, loadSampleJob, clearSampleSelection } from './services/samples.ts';
@@ -250,6 +250,7 @@ const setScore = (result: ATSAnalysisResult): void => {
     // Update overview and technical details
     updateOverviewTab(result);
     updateTechnicalDetailsInOverview(modelInfo);
+    renderSkillMatchMap(result);
 
     // Show results section with smooth animation
     if (scoreElements.resultsSection) {

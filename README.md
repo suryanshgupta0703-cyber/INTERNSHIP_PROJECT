@@ -1,65 +1,73 @@
 <div align="center">
   <img src="public/favicon.svg" alt="ATS Resume Analyzer logo" width="84" />
   <h1>ATS Resume Analyzer</h1>
-  <p><strong>Private • Local • Instant AI Resume Analysis</strong></p>
+  <p><strong>Private · Local · Instant AI Resume Analysis</strong></p>
   <p>
     <img src="https://img.shields.io/badge/status-beta-6C5CE7?style=for-the-badge&labelColor=0A0E27" alt="Beta status" />
+    <img src="https://img.shields.io/badge/deployed-Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white&labelColor=0A0E27" alt="Cloudflare deployment" />
+    <img src="https://img.shields.io/badge/AI-Transformers.js-yellow?style=for-the-badge&labelColor=0A0E27" alt="Transformers.js" />
   </p>
 </div>
 
-An AI-powered ATS resume analyzer built by **Suryansh Gupta** during an AI/ML internship. This browser-based application runs transformer models locally on your device using WebAssembly, ensuring complete privacy. Resume and job description data are processed in-browser and are never uploaded to external servers.
+A browser-based ATS (Applicant Tracking System) resume analyzer powered by on-device AI. Transformer models run entirely inside your browser via WebAssembly — your resume and job description are never sent to any server.
 
-## Why ATS Resume Analyzer
+## Why ATS Resume Analyzer?
 
-- **Privacy-first workflow**: No account required, no backend resume processing, zero data collection
-- **Local AI inference**: Runs Transformer models directly in the browser using Transformers.js and ONNX Runtime Web
-- **Semantic similarity analysis**: Uses state-of-the-art sentence transformers for deep semantic understanding
-- **Multiple input formats**: Supports pasted text and PDF input with intelligent text extraction
-- **Fast compatibility scoring**: Real-time ATS compatibility scoring with semantic and domain checks
-- **Open source and auditable**: Complete transparency in AI processing and scoring logic
-- **Mobile responsive**: Optimized for all devices with progressive web app capabilities
+- **Privacy-first by design** — No account, no backend, no data collection. All processing is local.
+- **On-device AI inference** — Runs `Xenova/all-MiniLM-L6-v2` via Transformers.js and ONNX Runtime Web (WASM).
+- **Hybrid scoring engine** — Combines semantic similarity, domain compatibility, and taxonomy-based skill matching for a nuanced ATS score.
+- **Multi-format input** — Paste text directly or upload a PDF. PDF text extraction is handled in-browser using PDF.js.
+- **Web Worker architecture** — Heavy ML inference runs on a dedicated Web Worker thread via Comlink, keeping the UI fully responsive.
+- **Cloudflare-native deployment** — A Cloudflare Worker acts as a same-origin proxy for Hugging Face model files, eliminating CORS issues without any backend infrastructure.
+- **Progressive Web App** — Offline-capable with a Service Worker and browser-cached models after the first load.
+- **Mobile optimized** — Responsive layout with device-aware optimizations.
 
 ## Current Status
 
-This project is in **beta** phase. Core analysis is production-ready with successful deployment on Cloudflare Pages. The application demonstrates practical implementation of AI/ML concepts in a real-world scenario.
+**Beta** — Core analysis is production-ready and deployed on Cloudflare Pages + Workers. The app is fully functional for semantic and skill-based resume analysis.
+
+---
 
 ## Quick Start (Local Development)
 
 ```bash
-git clone https://github.com/suryanshgupta0703-cyber/INTERNSHIP_PROJECT.git
-cd INTERNSHIP_PROJECT
+git clone <your-repo-url>
+cd localATS
 npm install
 npm run dev
 ```
 
-Open the dev server URL shown by Vite (typically `http://localhost:3000`).
+Open `http://localhost:3000`. Models are downloaded automatically from Hugging Face on first use.
 
-**Note**: Models are automatically downloaded from HuggingFace on first use. No manual model download required.
+---
 
 ## Available Scripts
 
 | Command | Purpose |
 |---|---|
-| `npm run dev` | Start local dev server |
+| `npm run dev` | Start local dev server (port 3000) |
 | `npm run build` | Build production assets to `dist/` |
-| `npm run preview` | Preview built app |
-| `npm run serve` | Preview on port `3000` |
+| `npm run preview` | Preview the production build locally |
+| `npm run serve` | Preview on port 3000 |
 | `npm run test` | Run tests in watch mode |
-| `npm run test:run` | Run tests once (CI-style) |
-| `npm run test:ui` | Run Vitest UI |
+| `npm run test:run` | Run tests once (CI) |
+| `npm run test:ui` | Launch Vitest UI |
+
+---
 
 ## Environment Configuration
 
-The application uses environment variables for model configuration. Create a `.env` file in the root directory:
+Create a `.env` file in the project root:
 
 ```bash
-# Model source: 'remote' uses HuggingFace CDN (recommended)
+# 'remote' fetches models via the Cloudflare Worker proxy (recommended)
+# 'local' uses models from the local filesystem (for offline dev)
 VITE_MODEL_SOURCE=remote
 
-# Base URL for models (HuggingFace for remote mode)
+# Base URL for remote models (only used in local dev; production auto-detects origin)
 VITE_MODEL_BASE_URL=https://huggingface.co
 
-# Model names - using Xenova models optimized for browser AI
+# Sentence transformer model identifiers (Xenova namespace = browser-optimized)
 VITE_SEMANTIC_MODEL_PATH=Xenova/all-MiniLM-L6-v2
 VITE_DOMAIN_MODEL_PATH=Xenova/all-MiniLM-L6-v2
 
@@ -68,231 +76,179 @@ VITE_DEBUG_MODE=true
 VITE_ENABLE_CACHE=true
 ```
 
-The app reads model settings from [`src/config/model-config.ts`](src/config/model-config.ts).
+> **Production note:** In a production build (`import.meta.env.PROD === true`), `model-config.ts` automatically forces remote mode and routes all model requests through the same-origin `/models-proxy/*` path served by `worker.js`. No environment variable override is needed for Cloudflare deployments.
 
-## AI/ML Models Used
+Configuration is managed in [`src/config/model-config.ts`](src/config/model-config.ts).
 
-This project demonstrates practical application of modern AI/ML techniques:
+---
 
-### Primary Model: Xenova/all-MiniLM-L6-v2
-- **Type**: Sentence Transformer (DistilBERT-based)
-- **Purpose**: Semantic similarity analysis and embeddings generation
-- **Size**: ~90MB (quantized)
-- **Optimization**: Specifically optimized for Transformers.js and browser deployment
-- **Use Case**: Computes semantic similarity between resume and job descriptions
+## AI/ML Models
 
-### Domain Model: Xenova/all-MiniLM-L6-v2
-- **Type**: Sentence Transformer (shared with semantic model)
-- **Purpose**: Domain compatibility analysis
-- **Use Case**: Identifies domain alignment between resume and job requirements
+### Sentence Transformer — `Xenova/all-MiniLM-L6-v2`
+- **Architecture**: DistilBERT (6 layers, 66 M parameters)
+- **Purpose**: Generates 384-dimensional sentence embeddings for both semantic similarity and domain compatibility analysis
+- **Quantization**: int8 WASM-quantized (~90 MB)
+- **Runtime**: Transformers.js + ONNX Runtime Web (WASM backend)
 
-### Skill Extraction
-- **Technology**: Natural Language Processing (NLP) with custom taxonomy
-- **Purpose**: Extracts and matches skills from resume and job descriptions
-- **Method**: Pattern-based extraction with domain-specific keywords
+### Skill Extractor
+- **Source**: `public/skills_taxonomy.json` — a flat JSON dictionary mapping skill variations to canonical skill labels
+- **Method**: N-gram tokenization (up to 5-grams) matched against the in-memory dictionary
+- **Used for**: Identifying matched and missing skills between resume and job description, and applying skill-match penalties/boosts to the final score
 
-## Deployment Options
+---
 
-### Option 1: Cloudflare Pages (Recommended - Currently Deployed)
+## Scoring Logic
 
-The project is currently deployed at: https://internship-project.suryanshgupta0703.workers.dev
+The ATS score is a composite of three signals:
 
-**To deploy your own version:**
+1. **Semantic Similarity** — Cosine similarity (dot product of normalized embeddings) between resume and job description.
+2. **Domain Compatibility** — A second embedding pass; if both texts score > 0.5 similarity and skill match > 30%, a domain-alignment boost is applied.
+3. **Skill Match Factor** — Ratio of matched skills to average total skills. Applied as a non-linear multiplier:
+   - < 10% match → ×0.5
+   - < 30% match → ×0.7
+   - < 50% match → ×0.85
+   - ≥ 50% match → no penalty
 
-1. **Build the project**:
-   ```bash
-   npm run build
-   ```
+**Final score formula:**
+```
+Base Score    = Semantic Similarity × 100
+Domain Boost  = if (same domain AND skill match > 30%): 50 + (base × 0.5)
+Skill Penalty = applied as multiplier based on skill match factor
+Final Score   = clamp(0, 100, adjusted score)
+Confidence    = (semantic × 0.7 + |domain| × 0.3) × 100
+```
 
-2. **Deploy to Cloudflare Pages**:
-   - Connect your GitHub repository to Cloudflare Pages
-   - Set build command: `npm run build`
-   - Set output directory: `dist`
-   - Deploy command: `npx wrangler deploy` (if using Cloudflare Workers)
+A 20-point penalty is applied separately if zero matching skills are found.
 
-3. **Environment variables** (configured in Cloudflare dashboard):
-   ```
-   VITE_MODEL_SOURCE=remote
-   VITE_MODEL_BASE_URL=https://huggingface.co
-   VITE_SEMANTIC_MODEL_PATH=Xenova/all-MiniLM-L6-v2
-   VITE_DOMAIN_MODEL_PATH=Xenova/all-MiniLM-L6-v2
-   ```
+---
 
-### Option 2: Netlify/Vercel
+## Architecture Overview
 
-1. **Build the project**:
-   ```bash
-   npm run build
-   ```
+```
+Browser (Main Thread)
+├── index.html + CSS
+├── main.ts            → Orchestrates UI, PDF uploads, and worker communication
+├── ui/                → DOM management, alerts, modals, navigation, analysis display
+└── services/          → PDF text extraction (PDF.js), sample data
 
-2. **Deploy**:
-   - Connect your repository to Netlify or Vercel
-   - Set build command: `npm run build`
-   - Set output directory: `dist`
-   - Add environment variables in the platform dashboard
+Browser (Web Worker Thread — via Comlink)
+└── ats-worker.ts      → Hosts ATSEngine; handles model loading and inference
+    └── ats-engine.ts  → Transformers.js pipeline, skill extraction, scoring
 
-### Option 3: Static Hosting (GitHub Pages, Surge, etc.)
+Cloudflare Worker (Edge — worker.js)
+└── /models-proxy/*    → Reverse-proxies Hugging Face model files same-origin
+└── ASSETS             → Serves static dist/ files
+```
 
-1. **Build the project**:
-   ```bash
-   npm run build
-   ```
-
-2. **Deploy**:
-   ```bash
-   # For GitHub Pages
-   npm run build
-   # Copy dist/ contents to your GitHub Pages branch
-
-   # For Surge
-   npm run build
-   surge dist your-domain.surge.sh
-   ```
+---
 
 ## Tech Stack
 
-### Frontend Framework
-- **Vite**: Fast build tool and dev server
-- **TypeScript**: Type-safe development
-- **Vanilla JavaScript**: No framework dependencies for maximum performance
+| Layer | Technology |
+|---|---|
+| Build | Vite 6 + TypeScript 5 |
+| AI Inference | Transformers.js v3 (ONNX Runtime Web, WASM backend) |
+| Worker Bridge | Comlink v4 |
+| PDF Extraction | PDF.js v5 (CDN worker fallback) |
+| NLP | Compromise.js, custom N-gram skill extractor |
+| Styling | Vanilla CSS (custom design system) + Tailwind (dev) |
+| Deployment | Cloudflare Workers + Pages |
+| Testing | Vitest |
 
-### AI/ML Technologies
-- **Transformers.js**: Hugging Face transformers library for browser
-- **ONNX Runtime Web**: Optimized inference engine for WebAssembly
-- **Sentence Transformers**: State-of-the-art semantic similarity models
-- **NLP**: Natural language processing for skill extraction
-
-### Browser Technologies
-- **Web Workers**: Off-main-thread ML inference for non-blocking UI
-- **Comlink**: Type-safe RPC for worker communication
-- **WebAssembly**: High-performance execution of ML models
-- **Service Workers**: Offline capabilities and caching
-
-### Data Processing
-- **PDF.js**: PDF text extraction and parsing
-- **Compromise.js**: Natural language processing library
-
-### Styling
-- **Custom CSS**: Responsive, mobile-first design
-- **Tailwind CSS**: Utility-first CSS framework (development support)
+---
 
 ## Project Structure
 
 ```text
-ats-resume-analyzer/
-├─ src/
-│  ├─ core/              # ATS engine and ML scoring logic
-│  │  ├─ ats-engine.ts   # Main ML inference engine
-│  │  ├─ text-parser.ts  # Text preprocessing and parsing
-│  │  ├─ skill-extractor.ts  # NLP-based skill extraction
-│  │  └─ errors.ts       # Custom error handling
-│  ├─ ui/                # UI behavior and interactions
-│  │  ├─ app.ts          # Main UI orchestration
-│  │  ├─ analysis.ts     # Analysis progress and results
-│  │  ├─ modals.ts       # Modal dialogs
-│  │  ├─ navigation.ts   # Tab switching and navigation
-│  │  └─ alerts.ts       # Alert notifications
-│  ├─ services/          # External service integrations
-│  │  ├─ pdf.ts          # PDF processing service
-│  │  └─ samples.ts      # Sample resume/job data
-│  ├─ workers/           # Web Worker for ML inference
-│  │  ├─ ats-worker.ts   # Worker-side ATS execution
-│  │  └─ ats-worker-client.ts  # Main thread worker client
-│  ├─ config/            # Configuration management
-│  │  └─ model-config.ts # Dynamic model configuration
-│  ├─ types/             # TypeScript type definitions
-│  ├─ utils/             # Utility functions
-│  └─ styles/            # Application styles
-├─ public/               # Static assets
-├─ tests/               # Unit and integration tests
-├─ scripts/             # Utility scripts
-├─ wrangler.jsonc       # Cloudflare Worker configuration
-└─ package.json         # Dependencies and scripts
+localATS/
+├── src/
+│   ├── core/
+│   │   ├── ats-engine.ts        # ML pipeline: embedding, scoring, recommendations
+│   │   ├── text-parser.ts       # Text cleaning and preprocessing
+│   │   ├── skill-extractor.ts   # N-gram skill matching against taxonomy
+│   │   └── errors.ts            # Typed error classes
+│   ├── workers/
+│   │   ├── ats-worker.ts        # Web Worker: exposes ATSEngine via Comlink
+│   │   └── ats-worker-client.ts # Main thread: Comlink client for the worker
+│   ├── config/
+│   │   └── model-config.ts      # Dynamic model URL resolution (local vs. remote)
+│   ├── services/
+│   │   ├── pdf.ts               # PDF upload, drag-and-drop, PDF.js extraction
+│   │   └── samples.ts           # Built-in sample resumes and job descriptions
+│   ├── ui/
+│   │   ├── analysis.ts          # Progress simulation, results rendering, skill map
+│   │   ├── modals.ts            # Modal dialogs (settings, model details, etc.)
+│   │   ├── navigation.ts        # Tab switching, FAQ, mobile menu
+│   │   ├── alerts.ts            # Toast/status notifications
+│   │   └── app.ts               # App-level UI init
+│   ├── utils/
+│   │   ├── dom.ts               # Type-safe DOM helpers
+│   │   ├── device.ts            # Mobile detection and optimizations
+│   │   └── helpers.ts           # Debounce, formatFileSize, etc.
+│   ├── types/                   # Shared TypeScript interfaces and type guards
+│   └── styles/                  # CSS: main, components, sections, results
+├── public/
+│   ├── _headers                 # Cloudflare Pages response headers (CORS, COEP, COOP)
+│   ├── skills_taxonomy.json     # Skill dictionary (~6 MB, loaded at runtime)
+│   ├── sw.js                    # Service Worker for offline caching
+│   └── manifest.json            # PWA manifest
+├── worker.js                    # Cloudflare Worker: model proxy + static asset serving
+├── wrangler.jsonc               # Wrangler configuration
+├── vite.config.js               # Vite build config
+└── package.json
 ```
 
-## AI/ML Implementation Details
+---
 
-### Semantic Similarity Analysis
-The application uses sentence transformers to compute deep semantic similarity between resume and job descriptions:
+## Deployment — Cloudflare
 
-1. **Text Preprocessing**: Clean and normalize input text
-2. **Embedding Generation**: Convert text to 384-dimensional vectors using DistilBERT
-3. **Similarity Computation**: Calculate cosine similarity between embeddings
-4. **Score Normalization**: Map similarity to 0-100 scale
+This project is deployed as a **Cloudflare Worker** (not a plain Cloudflare Pages site) so the Worker can proxy Hugging Face model files same-origin.
 
-### Skill Extraction
-Custom NLP pipeline for extracting skills from unstructured text:
+```bash
+npm run build
+npx wrangler deploy
+```
 
-1. **Pattern Matching**: Identify skill keywords using regex patterns
-2. **Taxonomy Matching**: Match against predefined skill taxonomy
-3. **Context Analysis**: Consider surrounding text for accuracy
-4. **Scoring**: Calculate skill match percentage
+`wrangler.jsonc` configures:
+- `assets.directory = ./dist` — serves the Vite build
+- `assets.run_worker_first = ["/models-proxy/*"]` — routes proxy paths through `worker.js` before serving static files
 
-### Domain Analysis
-Domain compatibility using semantic clustering:
+The `worker.js` proxies `GET /models-proxy/<path>` → `https://huggingface.co/<path>` with:
+- CORS headers on all responses
+- `Cache-Control: public, max-age=604800, immutable` (7-day edge + browser cache)
+- Range request forwarding for partial model file downloads
 
-1. **Domain Embeddings**: Pre-computed domain-specific embeddings
-2. **Similarity Calculation**: Compare resume against domain profiles
-3. **Classification**: Identify most likely domain alignment
-4. **Confidence Scoring**: Provide confidence metrics
-
-## Performance Optimization
-
-- **Web Workers**: ML inference runs in separate thread to prevent UI blocking
-- **Model Quantization**: Using int8 quantized models for faster inference
-- **WebAssembly**: Leverages WASM for near-native performance
-- **Lazy Loading**: Models loaded only when needed
-- **Caching**: Browser caching for repeated model downloads
-- **Code Splitting**: Optimized bundle sizes with Vite
+---
 
 ## Privacy & Security
 
-- **100% Local Processing**: All AI computation happens in the browser
-- **No Data Transmission**: Resume and job data never leave the device
-- **No Backend Processing**: No server-side analysis or storage
-- **No Tracking**: No analytics or user tracking
-- **Open Source**: Full code transparency and auditability
+- All AI inference happens in-browser. No resume or job description data is transmitted.
+- The only external requests made are to Hugging Face (proxied through the Worker) to download the model files on first use.
+- No analytics, no telemetry, no user accounts.
+- Open source — the full scoring logic is auditable.
 
-## About the Developer
+---
 
-This project was developed by **Suryansh Gupta** during an AI/ML internship, demonstrating practical application of machine learning concepts in a real-world web application.
+## Future Roadmap
 
-**Key Learning Outcomes:**
-- Implementation of transformer models in browser environments
-- Understanding of semantic similarity and NLP techniques
-- Privacy-first AI architecture design
-- WebAssembly and performance optimization
-- Modern web development with TypeScript
-- Production deployment on cloud platforms
+- [ ] WebGPU acceleration (currently WASM-only)
+- [ ] Support for additional sentence transformer models
+- [ ] ML-based Named Entity Recognition for skill extraction
+- [ ] Export analysis report as PDF or JSON
+- [ ] Multi-language resume support
+- [ ] Advanced skill gap visualization
 
-**Technical Skills Demonstrated:**
-- Machine Learning: Transformers, NLP, Semantic Similarity
-- Web Technologies: WebAssembly, Web Workers, Service Workers
-- Frontend Development: TypeScript, Vite, Responsive Design
-- DevOps: CI/CD, Cloudflare Pages deployment
-- Software Engineering: Testing, Error Handling, Code Architecture
-
-## Future Enhancements
-
-- [ ] Support for additional ML models (BERT, RoBERTa)
-- [ ] Advanced skill extraction with ML-based classification
-- [ ] Resume template matching
-- [ ] Multi-language support
-- [ ] Export analysis reports (PDF, JSON)
-- [ ] Integration with job boards
-- [ ] Advanced visualization of skill gaps
+---
 
 ## License
 
 Apache 2.0. See [LICENSE](LICENSE).
 
-## Live Demo
-
-Try the live application: https://internship-project.suryanshgupta0703.workers.dev
+---
 
 ## Acknowledgments
 
-- **Hugging Face**: For Transformers.js and pre-trained models
-- **Xenova**: For browser-optimized AI models
-- **ONNX Runtime**: For high-performance WebAssembly inference
-- **Cloudflare**: For hosting and deployment infrastructure
+- **Hugging Face** — Transformers.js and `Xenova/all-MiniLM-L6-v2`
+- **Mozilla** — PDF.js
+- **Microsoft** — ONNX Runtime Web
+- **Cloudflare** — Worker + Pages hosting infrastructure

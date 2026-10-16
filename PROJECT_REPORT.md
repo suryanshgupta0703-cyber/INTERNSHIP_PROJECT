@@ -1,594 +1,371 @@
-# ATS Resume Analyzer - Project Report
+# ATS Resume Analyzer — Project Report
 
-**Internship Project Report**
-
-**Developed by:** Suryansh Gupta  
-**Domain:** Artificial Intelligence / Machine Learning  
-**Project Duration:** [Insert Duration]  
-**Date:** October 2025
+**Status:** Production Deployed  
+**Platform:** Cloudflare Workers + Pages  
+**Version:** 1.0.0 (Beta)
 
 ---
 
 ## Executive Summary
 
-The ATS Resume Analyzer is a cutting-edge web application that leverages state-of-the-art Artificial Intelligence and Machine Learning techniques to analyze resume compatibility with job descriptions. The project demonstrates practical implementation of transformer models, natural language processing, and privacy-first AI architecture in a production-ready web application.
+The ATS Resume Analyzer is a browser-based AI application that performs resume-to-job-description compatibility analysis entirely on the user's device. It uses a pre-trained sentence transformer model running via WebAssembly, with zero server-side data processing. The result is a production-grade, privacy-preserving tool deployed at global scale on Cloudflare's edge network at no infrastructure cost.
 
-**Key Achievement:** Successfully deployed a fully functional AI-powered application that runs ML models directly in the browser using WebAssembly, ensuring complete user privacy while delivering real-time analysis.
-
----
-
-## 1. Project Overview
-
-### 1.1 Problem Statement
-
-Applicant Tracking Systems (ATS) are used by over 75% of recruiters to screen resumes. These systems analyze resumes for keywords, skills, and semantic alignment with job descriptions. Many job seekers lack tools to:
-- Understand how their resumes perform against ATS algorithms
-- Identify skill gaps in their applications
-- Optimize their resumes for specific job postings
-- Get instant, private feedback without sharing sensitive data
-
-### 1.2 Solution
-
-Developed a browser-based ATS analyzer that:
-- Runs AI models locally on the user's device (100% privacy)
-- Uses transformer models for semantic similarity analysis
-- Provides real-time compatibility scores and recommendations
-- Supports both text and PDF input formats
-- Requires no account registration or data transmission
-
-### 1.3 Innovation Highlights
-
-1. **Local AI Inference**: First to deploy transformer models entirely in-browser using WebAssembly
-2. **Privacy-First Architecture**: Zero data collection or transmission
-3. **Real-Time Analysis**: Sub-2 second analysis time with semantic similarity
-4. **No Infrastructure Costs**: Serverless deployment with no backend requirements
-5. **Open Source**: Complete transparency in AI processing
+**Key outcome:** A fully functional AI scoring system that runs ML inference in-browser, proxies model files through a Cloudflare Worker to avoid CORS issues, and delivers real-time ATS compatibility analysis with semantic similarity, domain detection, and skill taxonomy matching.
 
 ---
 
-## 2. Technical Architecture
+## 1. Problem Statement
 
-### 2.1 System Architecture
+Applicant Tracking Systems (ATS) are used by the majority of employers to screen resumes automatically. Job seekers face two problems:
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    User Browser                         │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌──────────────┐         ┌──────────────┐            │
-│  │   Main UI    │◄────────┤  Web Worker  │            │
-│  │   Thread     │  Comlink│   Thread     │            │
-│  └──────────────┘         └──────────────┘            │
-│         │                        │                    │
-│         │                        │                    │
-│         ▼                        ▼                    │
-│  ┌──────────────┐         ┌──────────────┐            │
-│  │   DOM/UI     │         │  AI Engine   │            │
-│  │  Management  │         │  (Transformers│           │
-│  └──────────────┘         │      .js)    │            │
-│                           └──────────────┘            │
-│                                    │                    │
-│                                    ▼                    │
-│                           ┌──────────────┐            │
-│                           │  ONNX Runtime│            │
-│                           │     (WASM)    │            │
-│                           └──────────────┘            │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+1. **Opacity** — They cannot easily know how their resume ranks against a specific job description before applying.
+2. **Privacy** — Existing ATS analysis tools require uploading resumes to third-party servers, creating unnecessary data privacy risks.
 
-### 2.2 Technology Stack
-
-#### AI/ML Technologies
-- **Transformers.js v3.7.3**: Hugging Face transformers library for browser
-  - Enables running transformer models in JavaScript/TypeScript
-  - Supports multiple model architectures (BERT, DistilBERT, etc.)
-  - Optimized for WebAssembly execution
-
-- **ONNX Runtime Web v1.22.0**: High-performance inference engine
-  - Executes models in WebAssembly for near-native performance
-  - Supports multi-threading for parallel processing
-  - Optimized memory management for browser constraints
-
-- **Sentence Transformers**: Semantic similarity models
-  - Model: Xenova/all-MiniLM-L6-v2 (DistilBERT-based)
-  - Generates 384-dimensional embeddings
-  - Pre-trained on large text corpora for semantic understanding
-
-- **Natural Language Processing**: Custom skill extraction
-  - Pattern-based extraction with domain-specific keywords
-  - Taxonomy matching for standardized skill identification
-  - Context-aware analysis for improved accuracy
-
-#### Web Technologies
-- **Vite v6.4.4**: Fast build tool and development server
-- **TypeScript v5.9.3**: Type-safe development with comprehensive type definitions
-- **Web Workers API**: Off-main-thread ML inference
-- **Comlink v4.4.2**: Type-safe RPC for worker communication
-- **WebAssembly**: High-performance execution environment
-- **Service Workers**: Offline capabilities and intelligent caching
-
-#### Data Processing
-- **PDF.js v5.7.284**: PDF text extraction and parsing
-- **Compromise.js v14.14.4**: Natural language processing utilities
-
-#### Deployment
-- **Cloudflare Pages**: Serverless static hosting with global CDN
-- **Cloudflare Workers**: Edge computing for asset delivery
-
-### 2.3 AI/ML Pipeline
-
-```
-Input (Resume + Job Description)
-            │
-            ▼
-┌───────────────────────┐
-│  Text Preprocessing   │
-│  - Cleaning           │
-│  - Normalization      │
-│  - Tokenization       │
-└───────────────────────┘
-            │
-            ▼
-┌───────────────────────┐
-│  Skill Extraction     │
-│  - Pattern Matching   │
-│  - Taxonomy Lookup    │
-│  - Context Analysis   │
-└───────────────────────┘
-            │
-            ▼
-┌───────────────────────┐
-│  Embedding Generation │
-│  (Sentence Transformer)│
-│  - Text → Vector      │
-│  - 384 dimensions     │
-└───────────────────────┘
-            │
-            ▼
-┌───────────────────────┐
-│  Similarity Analysis  │
-│  - Cosine Similarity  │
-│  - Domain Analysis    │
-│  - Skill Matching     │
-└───────────────────────┘
-            │
-            ▼
-┌───────────────────────┐
-│  Score Calculation    │
-│  - Semantic Score     │
-│  - Domain Score       │
-│  - Skill Score        │
-│  - Final ATS Score    │
-└───────────────────────┘
-            │
-            ▼
-    Recommendations & UI
-```
+This project addresses both by providing a local, transparent, and auditable ATS scoring tool.
 
 ---
 
-## 3. AI/ML Implementation Details
+## 2. Solution Design
 
-### 3.1 Semantic Similarity Analysis
+### Core Principles
+- **Privacy-first**: All text processing stays in the browser. Nothing is transmitted.
+- **Zero infrastructure**: No backend database, no API server, no per-request cost.
+- **Transparency**: The full scoring logic is open-source and auditable.
+- **Cloudflare-native**: Leverages Cloudflare Worker as a same-origin model proxy to sidestep CORS without a real backend.
 
-**Objective**: Compute deep semantic similarity between resume and job descriptions beyond simple keyword matching.
+### What the App Does
+1. User inputs a resume (text paste or PDF upload) and a job description.
+2. Both inputs are sent to a Web Worker thread via Comlink RPC.
+3. The worker loads `Xenova/all-MiniLM-L6-v2` (if not cached) from Hugging Face through the `/models-proxy/*` edge proxy.
+4. Embeddings are computed for both texts using mean-pooled, normalized vectors.
+5. Cosine similarity (dot product), domain compatibility, and skill taxonomy matching are combined into a final ATS score (0–100).
+6. Results — score, confidence, matched/missing skills, recommendations — are rendered in the UI.
 
-**Model**: Xenova/all-MiniLM-L6-v2
-- **Architecture**: DistilBERT (6-layer, 66M parameters)
-- **Embedding Dimension**: 384
-- **Training**: Pre-trained on sentence pairs for semantic similarity
-- **Quantization**: int8 quantized for browser deployment (~90MB)
+---
 
-**Implementation**:
+## 3. Technical Architecture
+
+### 3.1 System Diagram
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                     User's Browser                       │
+│                                                          │
+│  ┌────────────────┐  Comlink RPC  ┌──────────────────┐  │
+│  │  Main Thread   │◄─────────────►│   Web Worker     │  │
+│  │  (UI / DOM)    │               │  (ATSEngine)     │  │
+│  └────────────────┘               └──────────────────┘  │
+│          │                               │               │
+│          │                               ▼               │
+│          │                    ┌──────────────────┐       │
+│          │                    │ Transformers.js   │       │
+│          │                    │ (ONNX WASM)       │       │
+│          │                    └──────────────────┘       │
+│          │                               │               │
+│          ▼                               ▼               │
+│  ┌────────────────┐          /models-proxy/* fetch       │
+│  │ PDF.js Worker  │                      │               │
+│  │(PDF extraction)│          ┌───────────┴──────────┐    │
+│  └────────────────┘          │  Cloudflare Worker   │    │
+│                              │  (worker.js)         │    │
+└──────────────────────────────│──────────────────────│────┘
+                               │                      │
+                               ▼                      ▼
+                    Hugging Face CDN          Static dist/ assets
+                    (model files)            (Cloudflare Pages)
+```
+
+### 3.2 Key Architectural Decisions
+
+**Cloudflare Worker as Model Proxy**
+
+Hugging Face does not consistently return CORS headers when requested from arbitrary origins. Rather than relying on a third-party CORS proxy, `worker.js` is deployed as a Cloudflare Worker that intercepts all requests to `/models-proxy/*` and forwards them to `huggingface.co` with proper CORS headers. The Worker also caches model responses for 7 days at the edge (`Cache-Control: public, max-age=604800, immutable`), dramatically reducing cold-start latency for returning users.
+
+**Web Worker + Comlink**
+
+ML model loading and inference (embedding generation, similarity calculation) are dispatched to a dedicated Web Worker. Comlink provides a transparent RPC layer, making the worker API appear as a regular async TypeScript class from the main thread. This keeps the UI fully interactive even while models are loading.
+
+**Dynamic Model Configuration**
+
+`src/config/model-config.ts` distinguishes between local development (direct Hugging Face URLs) and production (same-origin Worker proxy URLs). In production builds, the configuration is hardcoded to route through the Worker proxy regardless of environment variables, ensuring correct behavior on Cloudflare.
+
+**PDF.js Worker Fallback**
+
+PDF.js requires a dedicated worker for its parsing engine. In production builds, the worker is loaded from a CDN (`cdnjs.cloudflare.com`) as a fallback, since bundling the PDF.js worker in a WASM-heavy build can conflict with Content Security Policy headers. The primary path resolves the worker relative to `import.meta.url`.
+
+### 3.3 Technology Stack
+
+| Category | Technology | Version |
+|---|---|---|
+| Build System | Vite | 6.x |
+| Language | TypeScript | 5.x |
+| AI Framework | Transformers.js (`@huggingface/transformers`) | 3.7.x |
+| ML Runtime | ONNX Runtime Web | 1.22.0-dev |
+| Worker Bridge | Comlink | 4.4.x |
+| PDF Processing | PDF.js (`pdfjs-dist`) | 5.7.x |
+| NLP | Compromise.js | 14.x |
+| Styling | Vanilla CSS + Tailwind CSS (dev) | — |
+| Deployment | Cloudflare Workers + Pages | — |
+| Testing | Vitest | 3.x |
+
+---
+
+## 4. AI/ML Pipeline
+
+### 4.1 Model: `Xenova/all-MiniLM-L6-v2`
+
+- **Architecture**: DistilBERT with 6 transformer layers, 66 M parameters
+- **Task**: Sentence embedding (feature extraction)
+- **Embedding dimension**: 384
+- **Quantization**: int8, WASM-optimized (~90 MB on disk)
+- **Why this model**: Specifically packaged for Transformers.js (Xenova namespace), avoids CORS issues, fast inference in WASM
+
+**Embedding computation:**
 ```typescript
-// Generate embeddings
-const resumeEmbedding = await model(resumeText, {
-    pooling: 'mean',
-    normalize: true
-});
+const output = await model(text, { pooling: 'mean', normalize: true });
+// output.data → Float32Array of 384 dimensions
+```
 
-const jobEmbedding = await model(jobText, {
-    pooling: 'mean',
-    normalize: true
-});
-
-// Calculate cosine similarity
+**Similarity calculation (dot product of normalized vectors = cosine similarity):**
+```typescript
 const similarity = dot(resumeEmbedding.data, jobEmbedding.data);
+// Range: [0, 1] after normalization
 ```
 
-**Performance**:
-- First load: 10-30 seconds (model download from HuggingFace)
-- Subsequent loads: <1 second (browser cache)
-- Inference time: 500-800ms per analysis
-- Memory usage: ~150MB
+Text is truncated to 10,000 characters before embedding to stay within practical token limits.
 
-### 3.2 Skill Extraction
+### 4.2 Skill Extraction Pipeline
 
-**Objective**: Extract and match technical and soft skills from unstructured text.
+The skill extractor uses a dictionary-based approach loaded from `public/skills_taxonomy.json` (~6 MB):
 
-**Methodology**:
-1. **Pattern-Based Extraction**: Regex patterns for common skill formats
-2. **Taxonomy Matching**: Predefined skill taxonomy with 500+ skills
-3. **Context Analysis**: Analyze surrounding text for disambiguation
-4. **Confidence Scoring**: Rank matches by confidence level
+1. **Tokenize** — Split text on whitespace and delimiters (`,-•*()[]/\n\r\t`), filter tokens under 2 characters.
+2. **N-gram generation** — Generate all possible phrases of 1 to 5 tokens from the token list.
+3. **Sort by length** — Longer phrases are matched first to prefer specific multi-word skills.
+4. **Dictionary lookup** — Check each phrase against the taxonomy map. The map normalizes variations to canonical skill labels.
 
-**Skill Categories**:
-- Programming Languages (Python, JavaScript, etc.)
-- Frameworks & Libraries (React, TensorFlow, etc.)
-- Tools & Platforms (Git, Docker, AWS, etc.)
-- Soft Skills (Communication, Leadership, etc.)
-- Domain-Specific Skills (varies by industry)
+Both resume and job description are processed independently. The intersection gives matched skills; the remainder from the job side gives missing skills.
 
-**Implementation**:
-```typescript
-class SkillExtractor {
-    private taxonomy: Map<string, string[]>;
-    
-    extractSkills(text: string): Set<string> {
-        const skills = new Set<string>();
-        
-        // Pattern matching
-        for (const [category, patterns] of this.taxonomy) {
-            for (const pattern of patterns) {
-                const matches = text.match(pattern);
-                if (matches) {
-                    matches.forEach(skill => skills.add(skill));
-                }
-            }
-        }
-        
-        return skills;
-    }
+### 4.3 Scoring Formula
+
+```
+Base Score    = semantic_similarity × 100
+
+Domain Boost:
+  isSameDomain = domain_similarity > 0.5
+  if (isSameDomain AND skill_match_factor > 0.3):
+    score = 50 + (Base Score × 0.5)
+  else:
+    score = Base Score
+
+Skill Penalty (non-linear):
+  skill_match_factor = matched_skills / avg(resume_skills, job_skills)
+  if skill_match_factor < 0.10 → score × 0.50
+  if skill_match_factor < 0.30 → score × 0.70
+  if skill_match_factor < 0.50 → score × 0.85
+
+Additional penalty:
+  if matched_skills == 0 → score − 20
+
+Final Score = clamp(0, 100, adjusted_score)
+
+Confidence = (semantic_similarity × 0.7 + |domain_similarity| × 0.3) × 100
+
+Domain Compatibility (UI display) = clamp(0, 100, domain_similarity × 50 + 50)
+
+Skill Depth (UI display) = skill_match_factor × 100
+```
+
+### 4.4 Recommendations
+
+Generated from the semantic similarity value:
+
+| Similarity Range | Recommendation Type | Priority |
+|---|---|---|
+| < 0.4 | Major content overhaul needed | High |
+| 0.4 – 0.6 | Content alignment improvements | High |
+| 0.6 – 0.8 | Fine-tune language to mirror job posting | Medium |
+| ≥ 0.8 | Focus on quantifying achievements | Low |
+
+A quantification suggestion is also added when the overall score is below 85.
+
+---
+
+## 5. Feature Set
+
+### 5.1 Input Options
+- **Text paste** — Direct textarea input for resume and job description
+- **PDF upload** — Drag-and-drop or click-to-upload with PDF.js text extraction (up to 10 MB)
+- **Sample data** — Built-in samples for tech, marketing, design, and finance roles
+
+### 5.2 Analysis Output
+- **Overall ATS Score** (0–100) with color-coded rating
+- **Confidence Score** — How certain the model is about the similarity
+- **Domain Compatibility** — Same-domain alignment indicator
+- **Skill Depth** — Proportion of skills matched
+- **Matched Skills** — Taxonomy-normalized list of skills found in both documents
+- **Missing Skills** — Skills required by the job but absent from the resume
+- **Recommendations** — Prioritized actions (immediate / strategic / formatting)
+- **Warnings** — Flagged issues (e.g., no skills detected, zero matched skills)
+
+### 5.3 UX Features
+- Real-time progress indicators during model loading and inference
+- Tab-based navigation between resume/job input sections
+- Modal dialogs for model info, settings, and detailed results
+- Mobile-responsive layout with device-specific optimizations
+- PWA-capable (offline via Service Worker after first load)
+
+---
+
+## 6. Deployment Configuration
+
+### Cloudflare Worker (`wrangler.jsonc`)
+```jsonc
+{
+  "name": "internship-project",
+  "compatibility_date": "2025-10-17",
+  "main": "worker.js",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/models-proxy/*"]
+  }
 }
 ```
 
-### 3.3 Domain Analysis
+`run_worker_first` ensures that model proxy requests reach `worker.js` before Cloudflare tries to serve a static file from `dist/`.
 
-**Objective**: Identify domain alignment between resume and job requirements.
+### Response Headers (`public/_headers`)
 
-**Method**:
-- Use semantic similarity to compare resume against domain profiles
-- Domains: Software Engineering, Data Science, Product Management, etc.
-- Confidence scoring based on similarity thresholds
-
-**Scoring Formula**:
 ```
-Domain Score = (Semantic Similarity × 50) + 50
-- If similarity > 0.5: Same domain (boost score)
-- If similarity < 0.5: Different domain (no boost)
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
 ```
 
-### 3.4 Final ATS Score Calculation
+`COEP: credentialless` (rather than `require-corp`) was chosen because model files fetched through the Worker proxy return CORS headers that satisfy credentialless mode, while `require-corp` required explicit Cross-Origin-Resource-Policy headers on every asset — creating brittle configuration.
 
-**Composite Score Formula**:
-```
-Base Score = Semantic Similarity × 100
-
-Domain Boost:
-- If same domain AND skill match > 30%: Base Score + 25
-- Else: Base Score
-
-Skill Penalty:
-- If skill match < 10%: Score × 0.5
-- If skill match < 30%: Score × 0.7
-- If skill match < 50%: Score × 0.85
-
-Final Score = Clamped(0, 100, Score after adjustments)
-```
-
-**Confidence Calculation**:
-```
-Confidence = (Semantic Similarity × 0.7) + (Domain Similarity × 0.3)
+### Deploy Command
+```bash
+npm run build
+npx wrangler deploy
 ```
 
 ---
 
-## 4. Features and Capabilities
+## 7. Performance Characteristics
 
-### 4.1 Core Features
+| Metric | Typical Value |
+|---|---|
+| First Contentful Paint | < 1.5 s |
+| Time to Interactive | < 3 s |
+| Model download (first load) | 10–30 s (from HF CDN) |
+| Model load from cache | < 1 s |
+| Analysis time (inference) | 0.5–2 s |
+| Peak memory (model loaded) | ~150 MB |
+| Bundle size (JS, gzipped) | ~8 MB (excl. model) |
+| Edge CDN build time | ~30 s |
 
-1. **Semantic Similarity Analysis**
-   - Deep understanding of resume-job alignment
-   - Beyond simple keyword matching
-   - Context-aware semantic comparison
-
-2. **Skill Extraction & Matching**
-   - Automated skill identification from unstructured text
-   - 500+ skills in taxonomy
-   - Match percentage calculation
-
-3. **Domain Compatibility**
-   - Identifies domain alignment
-   - Professional domain profiles
-   - Confidence metrics
-
-4. **PDF Processing**
-   - Upload and parse PDF resumes
-   - Intelligent text extraction
-   - Error handling for corrupted files
-
-5. **Real-Time Analysis**
-   - Sub-2 second analysis time
-   - Progress indicators
-   - Visual feedback
-
-6. **Privacy-First**
-   - 100% local processing
-   - No data transmission
-   - No account required
-
-### 4.2 User Interface
-
-- **Responsive Design**: Mobile-optimized, works on all devices
-- **Progressive Web App**: Offline capabilities
-- **Visual Feedback**: Real-time status updates
-- **Accessibility**: WCAG AA compliant
-- **Dark Mode Support**: Automatic theme detection
-
-### 4.3 Deployment Features
-
-- **Serverless Architecture**: No backend required
-- **Global CDN**: Cloudflare Pages for fast delivery
-- **Automatic Scaling**: Handles unlimited traffic
-- **Zero Infrastructure Costs**: No servers to maintain
+Model files are cached both at the Cloudflare edge (7 days) and in the browser's cache storage via the Service Worker (indefinite until cache eviction).
 
 ---
 
-## 5. Development Process
+## 8. Engineering Challenges & Solutions
 
-### 5.1 Methodology
+### Challenge 1 — CORS on Hugging Face Model Files
+**Problem**: Hugging Face CDN responses sometimes omit `Access-Control-Allow-Origin` headers, causing `fetch()` to fail in the browser.
 
-- **Agile Development**: Iterative development with continuous testing
-- **Test-Driven Development**: Unit tests for core logic
-- **Code Review**: Self-review and best practices adherence
-- **Documentation**: Comprehensive inline documentation
+**Solution**: A Cloudflare Worker (`worker.js`) proxies all model requests through the same origin. Every response from the Worker includes explicit CORS headers and a 7-day cache directive.
 
-### 5.2 Challenges and Solutions
+### Challenge 2 — PDF.js Worker in Production Build
+**Problem**: Vite's bundle output changed the path of the PDF.js worker file, causing a 404 at runtime in production.
 
-#### Challenge 1: Model Loading in Browser
-**Problem**: Loading large ML models in browser environment with memory constraints.
+**Solution**: The worker source is resolved using `new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url)`. A try/catch falls back to loading the worker from the CDN if the URL resolution fails. This covers both bundled and unbundled deployment scenarios.
 
-**Solution**:
-- Used quantized models (int8) to reduce size
-- Implemented lazy loading
-- Added progress indicators
-- Used Web Workers to prevent UI blocking
+### Challenge 3 — `Cross-Origin-Embedder-Policy` Compatibility
+**Problem**: ONNX Runtime Web requires `SharedArrayBuffer` for multi-threaded WASM, which requires `COEP: require-corp`. But `require-corp` blocked external assets (Google Fonts, CDN resources) unless they included `CORP` headers.
 
-#### Challenge 2: PDF Text Extraction
-**Problem**: PDF.js worker configuration failing in production build.
+**Solution**: Used `COEP: credentialless` instead of `require-corp`. This satisfies the WASM threading requirement while allowing credentialless cross-origin fetches without requiring `CORP` on every resource.
 
-**Solution**:
-- Switched to CDN-based worker loading
-- Added fallback error handling
-- Implemented CORS-compliant configuration
+### Challenge 4 — UI Blocking During ML Inference
+**Problem**: Loading and running transformer models on the main thread would freeze the UI for several seconds.
 
-#### Challenge 3: Model Performance
-**Problem**: Initial models were too large and slow for browser deployment.
-
-**Solution**:
-- Switched to Xenova models (optimized for browser)
-- Used WebAssembly for near-native performance
-- Implemented model caching
-- Optimized inference pipeline
-
-#### Challenge 4: Privacy vs. Functionality
-**Problem**: Balancing advanced AI features with complete privacy.
-
-**Solution**:
-- All processing done client-side
-- No telemetry or analytics
-- Open source for transparency
-- Clear privacy communication
-
-### 5.3 Testing Strategy
-
-- **Unit Tests**: Core ML logic (Vitest)
-- **Integration Tests**: End-to-end workflows
-- **Manual Testing**: Cross-browser compatibility
-- **Performance Testing**: Load time and inference speed
-- **Security Testing**: Privacy verification
+**Solution**: The entire `ATSEngine` (model loading + inference) runs inside a Web Worker. Comlink provides transparent async RPC so the main thread calls `worker.score(resume, job)` as a normal async function. Status updates from the worker flow back via `self.postMessage` and are rendered as progress indicators.
 
 ---
 
-## 6. Performance Metrics
+## 9. Security & Privacy
 
-### 6.1 Application Performance
-
-| Metric | Value |
-|--------|-------|
-| First Contentful Paint (FCP) | <1.5s |
-| Time to Interactive (TTI) | <3s |
-| Model Download Time | 10-30s (first load) |
-| Analysis Time | 0.5-2s |
-| Bundle Size | ~50MB (including models) |
-| Memory Usage | ~150MB |
-
-### 6.2 AI/ML Performance
-
-| Metric | Value |
-|--------|-------|
-| Embedding Generation | 200-400ms per text |
-| Similarity Calculation | <50ms |
-| Skill Extraction | 100-200ms |
-| Total Inference Time | 500-800ms |
-| Model Accuracy | ~85% (semantic similarity) |
-
-### 6.3 Deployment Metrics
-
-| Metric | Value |
-|--------|-------|
-| Build Time | ~30s |
-| Bundle Size | ~50MB |
-| Deployment Time | ~1-2 minutes |
-| Uptime | 99.9% (Cloudflare SLA) |
-| Global Latency | <100ms (avg) |
+| Property | Implementation |
+|---|---|
+| Data transmission | None — all text stays in-browser |
+| External requests | Only to Hugging Face (via Worker proxy) for model download |
+| Analytics / Telemetry | None |
+| Authentication | Not required |
+| Code transparency | Open source, full scoring logic auditable |
+| CSP / Security headers | Configured in `public/_headers` |
 
 ---
 
-## 7. Learning Outcomes
+## 10. Future Roadmap
 
-### 7.1 Technical Skills Acquired
-
-#### Machine Learning
-- Understanding of transformer architectures (BERT, DistilBERT)
-- Semantic similarity and embedding techniques
-- Natural Language Processing (NLP) fundamentals
-- Model quantization and optimization
-- ONNX model format and WebAssembly deployment
-
-#### Web Development
-- Modern JavaScript/TypeScript development
-- Web Workers and multi-threading
-- WebAssembly integration
-- Progressive Web App (PWA) development
-- Service Workers and caching strategies
-
-#### DevOps & Deployment
-- Cloudflare Pages deployment
-- Serverless architecture
-- CI/CD pipelines
-- Environment configuration management
-- Performance optimization
-
-#### Software Engineering
-- Type-safe development with TypeScript
-- Test-driven development
-- Error handling and logging
-- Code architecture and design patterns
-- Documentation practices
-
-### 7.2 AI/ML Concepts Mastered
-
-1. **Transformer Models**: Understanding of attention mechanisms and transformer architecture
-2. **Sentence Embeddings**: Text representation in vector space
-3. **Semantic Similarity**: Cosine similarity and dot product calculations
-4. **Model Quantization**: Reducing model size while maintaining accuracy
-5. **Edge AI**: Running ML models on edge devices (browsers)
-6. **Privacy-Preserving AI**: Designing AI systems that don't require data transmission
-
-### 7.3 Industry Applications
-
-This project demonstrates skills applicable to:
-- **AI/ML Engineering**: Building production ML systems
-- **NLP Applications**: Text analysis and understanding
-- **Edge Computing**: Deploying ML on edge devices
-- **Privacy Engineering**: Privacy-first system design
-- **Full-Stack Development**: End-to-end application development
+| Feature | Notes |
+|---|---|
+| WebGPU backend | Would significantly speed up inference on capable devices |
+| Additional models | BERT-base, RoBERTa for higher accuracy |
+| NER-based skill extraction | ML-based instead of dictionary lookup |
+| Export report | PDF or JSON download of analysis results |
+| Multi-language support | Non-English resumes and JDs |
+| Skill gap visualization | Interactive chart of matched vs. missing skills |
 
 ---
 
-## 8. Future Enhancements
+## 11. References
 
-### 8.1 Planned Features
-
-1. **Advanced ML Models**
-   - Support for BERT-base and RoBERTa models
-   - Fine-tuned models for specific industries
-   - Multi-lingual support
-
-2. **Enhanced NLP**
-   - ML-based skill classification
-   - Named Entity Recognition (NER)
-   - Resume structure parsing
-
-3. **Additional Features**
-   - Resume template matching
-   - Export analysis reports (PDF, JSON)
-   - Integration with job boards (LinkedIn, Indeed)
-   - Historical analysis tracking
-
-4. **Performance Improvements**
-   - Model compression techniques
-   - Progressive model loading
-   - WebGPU acceleration (when available)
-
-### 8.2 Research Opportunities
-
-1. **Custom Model Training**: Train domain-specific models for better accuracy
-2. **Few-Shot Learning**: Adapt models with minimal training data
-3. **Explainable AI**: Provide interpretable feature importance
-4. **Active Learning**: Improve models based on user feedback
+- Reimers, N. & Gurevych, I. (2019). *Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks*. EMNLP 2019.
+- Sanh, V. et al. (2019). *DistilBERT, a distilled version of BERT*. NeurIPS 2019.
+- Vaswani, A. et al. (2017). *Attention Is All You Need*. NeurIPS 2017.
+- [Transformers.js Documentation](https://huggingface.co/docs/transformers.js)
+- [ONNX Runtime Web Documentation](https://onnxruntime.ai/docs/get-started/with-javascript/web.html)
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
+- [PDF.js Documentation](https://mozilla.github.io/pdf.js/)
 
 ---
 
-## 9. Conclusion
+## Appendix A: Dependency Versions
 
-The ATS Resume Analyzer project successfully demonstrates the practical application of Artificial Intelligence and Machine Learning in a real-world web application. Key achievements include:
+### Production
+| Package | Version |
+|---|---|
+| `@huggingface/transformers` | 3.7.3 |
+| `onnxruntime-web` | 1.22.0-dev.20250409 |
+| `comlink` | 4.4.2 |
+| `pdfjs-dist` | 5.7.284 |
+| `compromise` | 14.14.4 |
+| `email-regex` | 6.1.0 |
 
-1. **Technical Excellence**: Deployed transformer models in browser environments using WebAssembly
-2. **Privacy Innovation**: Created a fully private AI system with zero data transmission
-3. **Production Readiness**: Successfully deployed to Cloudflare Pages with global availability
-4. **User Value**: Provides instant, actionable feedback to job seekers
-5. **Educational Value**: Comprehensive learning experience in AI/ML engineering
-
-This project showcases the future of AI on the web—powerful, private, and accessible to everyone without requiring expensive infrastructure or compromising privacy.
-
----
-
-## 10. References
-
-### Academic Papers
-- "Attention Is All You Need" (Vaswani et al., 2017)
-- "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks" (Reimers & Gurevych, 2019)
-- "DistilBERT, a distilled version of BERT" (Sanh et al., 2019)
-
-### Open Source Projects
-- Hugging Face Transformers.js
-- ONNX Runtime
-- Xenova/browser-transformers
-- PDF.js
-
-### Technologies
-- WebAssembly Specification
-- Web Workers API
-- Service Workers API
-- Cloudflare Pages Documentation
+### Development
+| Package | Version |
+|---|---|
+| `vite` | 6.x |
+| `typescript` | 5.9.x |
+| `vitest` | 3.2.x |
+| `tailwindcss` | 3.4.x |
 
 ---
 
-## Appendix A: Code Statistics
+## Appendix B: Source Structure Summary
 
 ```
-Language          Files    Lines    Code    Comments    Blanks
-─────────────────────────────────────────────────────────
-TypeScript          22     4500     3200         800       500
-CSS                  5      800      600         100       100
-HTML                 3      400      350          25        25
-JavaScript           2      200      150          30        20
-─────────────────────────────────────────────────────────
-Total               32     5900     4300         955       645
+Language       Files    Est. Lines
+──────────────────────────────────
+TypeScript       15      ~5,000
+CSS               4        ~800
+HTML              2        ~400
+JavaScript        1         ~83
+──────────────────────────────────
+Total            22      ~6,283
 ```
 
-## Appendix B: Dependencies
-
-### Production Dependencies
-- @huggingface/transformers: 3.7.3
-- onnxruntime-web: 1.22.0-dev
-- comlink: 4.4.2
-- pdfjs-dist: 5.7.284
-- compromise: 14.14.4
-- email-regex: 6.1.0
-
-### Development Dependencies
-- vite: 6.4.4
-- typescript: 5.9.3
-- vitest: 3.2.4
-- @vitest/ui: 3.2.4
-- tailwindcss: 3.4.17
-
-## Appendix C: Deployment Links
-
-- **Live Application**: https://internship-project.suryanshgupta0703.workers.dev
-- **GitHub Repository**: https://github.com/suryanshgupta0703-cyber/INTERNSHIP_PROJECT
-- **Cloudflare Pages Dashboard**: [Private Link]
-
 ---
 
-**Project Completed**: October 2025  
-**Final Status**: Production Deployed  
-**Evaluation**: [To be filled by evaluator]
-
----
-
-*This report was prepared by Suryansh Gupta as part of the AI/ML internship project documentation.*
+*Last updated: October 2026 | Status: Production Deployed*

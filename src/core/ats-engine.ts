@@ -156,9 +156,15 @@ export class ATSEngine {
             }
 
             const matchedSkills = new Set<string>();
+            const missingSkills: string[] = [];
             extractedResumeSkills.forEach(skill => {
                 if (extractedJobSkills.has(skill)) {
                     matchedSkills.add(skill);
+                }
+            });
+            extractedJobSkills.forEach(skill => {
+                if (!extractedResumeSkills.has(skill)) {
+                    missingSkills.push(skill);
                 }
             });
 
@@ -215,6 +221,12 @@ export class ATSEngine {
                 analysisId: types.createAnalysisId(`ats-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`),
                 timestamp: new Date().toISOString(),
                 warnings: analysisWarnings.length > 0 ? analysisWarnings : undefined,
+                skillMatch: {
+                    matched: Array.from(matchedSkills).sort(),
+                    missing: missingSkills.sort(),
+                    resumeSkills: Array.from(extractedResumeSkills).sort(),
+                    jobSkills: Array.from(extractedJobSkills).sort()
+                }
             };
             this.updatePerformanceMetrics(processingTime);
             this.emit('analysisComplete', analysisResult);

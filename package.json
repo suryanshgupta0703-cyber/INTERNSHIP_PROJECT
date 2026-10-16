@@ -24,7 +24,7 @@
     "ai",
     "privacy"
   ],
-  "author": "Suryansh Gupta",
+  "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^24.5.2",
