@@ -51,12 +51,14 @@ export function getModelConfig(): ModelConfig {
  * Get model paths based on environment
  */
 function getPaths(isLocal: boolean): ModelPaths {
-    if (isLocal) {
-        // Local development - serve from public/models
-        const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || '/models';
-        const semanticModelName = import.meta.env.VITE_SEMANTIC_MODEL_PATH || 'ats-semantic-v1-en';
-        const domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'ats-domain-v1-en';
+    // Use standard HuggingFace models that are publicly available
+    // Xenova/all-MiniLM-L6-v2 is a widely used sentence transformer model
+    const semanticModelName = import.meta.env.VITE_SEMANTIC_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
+    const domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
 
+    if (isLocal) {
+        // Local development - serve from public/models if downloaded, otherwise use remote
+        const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || '/models';
         const semanticModel = `${baseUrl}/${semanticModelName}`;
         const domainModel = `${baseUrl}/${domainModelName}`;
 
@@ -68,22 +70,16 @@ function getPaths(isLocal: boolean): ModelPaths {
             weightsPath: `${semanticModel}/universal_score_weights.json`
         };
     } else {
-        // Remote - R2 with HuggingFace-style structure
-        // Model paths are just model names (e.g., "ats-semantic-v1-en")
-        // transformers.js will construct: {remoteHost}/{model}/resolve/main/
+        // Remote - Use HuggingFace directly
         const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
-        const semanticModel = import.meta.env.VITE_SEMANTIC_MODEL_PATH || 'ats-semantic-v1-en';
-        const domainModel = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'ats-domain-v1-en';
 
-        // For ONNX and weights, construct full URLs manually
-        const semanticModelFullPath = `${baseUrl}/${semanticModel}/resolve/main`;
-
+        // For standard HF models, use the model name directly
         return {
-            semanticModel,  // Just the model name
-            domainModel,    // Just the model name
+            semanticModel: semanticModelName,
+            domainModel: domainModelName,
             baseUrl,
-            onnxBasePath: `${semanticModelFullPath}/onnx/`,
-            weightsPath: `${semanticModelFullPath}/universal_score_weights.json`
+            onnxBasePath: `${baseUrl}/${semanticModelName}/resolve/main/onnx/`,
+            weightsPath: `${baseUrl}/${semanticModelName}/resolve/main/universal_score_weights.json`
         };
     }
 }
