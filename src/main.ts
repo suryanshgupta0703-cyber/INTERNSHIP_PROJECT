@@ -6,11 +6,14 @@
 // Import PDF.js for local PDF processing with proper types
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker properly for Vite
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+// Configure PDF.js worker properly for both development and production
+// The worker needs to be loaded from the same origin due to SharedArrayBuffer requirements
+const workerUrl = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
     import.meta.url
 ).toString();
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 (window as any).pdfjsLib = pdfjsLib;
 
 // Import styles
