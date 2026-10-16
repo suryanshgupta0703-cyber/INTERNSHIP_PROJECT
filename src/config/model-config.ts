@@ -35,19 +35,10 @@ export function getModelConfig(): ModelConfig {
 
     const isLocal = modelSource === 'local';
 
-    // For production on Cloudflare Pages, use the worker proxy as remote host
-    // For local development, use HuggingFace directly
-    let remoteHost: string;
-    let remotePathTemplate: string;
-    if (isProduction) {
-        // Use self.location.origin instead of window.location.origin for Web Worker compatibility
-        const origin = typeof window !== 'undefined' ? window.location.origin : self.location.origin;
-        remoteHost = origin + '/proxy/hf';
-        remotePathTemplate = '{model}/resolve/main/';
-    } else {
-        remoteHost = isLocal ? '' : (import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co');
-        remotePathTemplate = isLocal ? '' : '{model}/resolve/main/';
-    }
+    // Use HuggingFace directly - it has proper CORS for Xenova models
+    // The Xenova models are designed to work in browser environments
+    const remoteHost = isLocal ? '' : (import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co');
+    const remotePathTemplate = isLocal ? '' : '{model}/resolve/main/';
 
     // Base configuration with hardcoded fallbacks for production
     const config: ModelConfig = {
@@ -97,17 +88,8 @@ function getPaths(_isLocal: boolean): ModelPaths {
         domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
     }
 
-    // For production on Cloudflare Pages, use the worker proxy to bypass CORS
-    // For local development, use HuggingFace directly
-    let baseUrl: string;
-    if (isProduction) {
-        // Use the Cloudflare Worker proxy
-        // Use self.location.origin for Web Worker compatibility
-        const origin = typeof window !== 'undefined' ? window.location.origin : self.location.origin;
-        baseUrl = origin + '/proxy/hf';
-    } else {
-        baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
-    }
+    // Use HuggingFace directly - Xenova models have proper CORS headers
+    const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
 
     console.log('[ModelConfig] Model paths:', {
         semanticModelName,

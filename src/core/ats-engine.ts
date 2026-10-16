@@ -245,12 +245,15 @@ export class ATSEngine {
             // Get dynamic model configuration (local or remote)
             const modelConfig = getModelConfig();
 
-            // Configure transformers environment based on model config
+            // Configure transformers environment for cross-origin requests
             env.allowLocalModels = modelConfig.allowLocalModels;
             env.allowRemoteModels = modelConfig.allowRemoteModels;
             env.localModelPath = modelConfig.allowLocalModels ? './' : '';
             env.remoteHost = modelConfig.remoteHost;
             env.remotePathTemplate = modelConfig.remotePathTemplate;
+
+            // Enable CORS for remote model loading
+            env.useBrowserCache = true;
 
             // Get model URLs (dynamic based on environment)
             const semanticModelUrl = getModelUrl('semantic');
