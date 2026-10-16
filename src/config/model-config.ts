@@ -28,7 +28,10 @@ export interface ModelConfig {
  */
 export function getModelConfig(): ModelConfig {
     const isProduction = import.meta.env.PROD;
-    const modelSource = import.meta.env.VITE_MODEL_SOURCE || (isProduction ? 'remote' : 'local');
+
+    // Force remote mode in production for Cloudflare Pages
+    // Even if env vars aren't set, this ensures correct behavior
+    const modelSource = isProduction ? 'remote' : (import.meta.env.VITE_MODEL_SOURCE || 'local');
 
     const isLocal = modelSource === 'local';
 
@@ -61,14 +64,34 @@ export function getModelConfig(): ModelConfig {
  * Get model paths based on environment
  */
 function getPaths(_isLocal: boolean): ModelPaths {
+    const isProduction = import.meta.env.PROD;
+
     // Use Xenova models optimized for browser AI
     // These are specifically designed for Transformers.js and work without CORS issues
-    const semanticModelName = import.meta.env.VITE_SEMANTIC_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
-    const domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
+    // In production (Cloudflare Pages), force Xenova models to avoid CORS issues
+    let semanticModelName: string;
+    let domainModelName: string;
+
+    if (isProduction) {
+        // Hardcode Xenova models for production to ensure they work on Cloudflare
+        semanticModelName = 'Xenova/all-MiniLM-L6-v2';
+        domainModelName = 'Xenova/all-MiniLM-L6-v2';
+    } else {
+        // In development, use env vars or fallback to Xenova
+        semanticModelName = import.meta.env.VITE_SEMANTIC_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
+        domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
+    }
 
     // For remote mode, just return the model name directly - transformers.js will handle the rest
     // For local mode, would need custom paths, but we're using remote for now
     const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
+
+    console.log('[ModelConfig] Model paths:', {
+        semanticModelName,
+        domainModelName,
+        baseUrl,
+        isProduction
+    });
 
     return {
         semanticModel: semanticModelName,

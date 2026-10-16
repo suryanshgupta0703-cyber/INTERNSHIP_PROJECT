@@ -262,7 +262,16 @@ export class ATSEngine {
             try {
                 this.model = await pipeline('feature-extraction', semanticModelUrl, {
                     quantized: true,
-                    device: 'wasm'
+                    device: 'wasm',
+                    progress_callback: (progress: any) => {
+                        if (progress.status === 'progress') {
+                            const percent = Math.round(progress.progress * 100);
+                            console.log(`[ATSEngine] Model download progress: ${percent}%`);
+                            if (percent < 100) {
+                                this.emit('statusUpdate', `Downloading model... ${percent}%`);
+                            }
+                        }
+                    }
                 }) as TransformerModel;
                 console.log(`[ATSEngine] ✅ Semantic model loaded (${modelConfig.source})`);
             } catch (error) {
