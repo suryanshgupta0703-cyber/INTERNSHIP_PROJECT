@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free AI-powered ATS resume analyzer that runs entirely in your browser. Get instant compatibility scores, optimization tips, and improve your job application success rate. 100% private - no data collection. Built by Suryansh Gupta."
+          name="description">
+    <meta content="#1D5254" name="theme-color">
+    <meta content="Suryansh Gupta" name="author">
+    <meta content="index, follow" name="robots">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ATS Resume Analyzer - Free & Private AI Resume Analyzer">
+    <meta property="og:description" content="Free AI-powered ATS resume analyzer that runs entirely in your browser. Get instant compatibility scores, optimization tips, and improve your job application success rate. 100% private - no data collection.">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="ATS Resume Analyzer - Free & Private AI Resume Analyzer">
+    <meta property="twitter:description" content="Free AI-powered ATS resume analyzer that runs entirely in your browser. Get instant compatibility scores, optimization tips, and improve your job application success rate. 100% private - no data collection.">
+
+    <link rel="manifest" href="/manifest.json">
+
+    <link href="/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href="/apple-touch-icon.svg" rel="apple-touch-icon">
+    <title>ATS Resume Analyzer - Free & Private AI Resume Analyzer</title>
+
+    <!-- CSS Stylesheets -->
+    <link href="/src/styles/main.css" rel="stylesheet">
+    <link href="/src/styles/components.css" rel="stylesheet">
+    <link href="/src/styles/results.css" rel="stylesheet">
+
+    <!-- Using system fonts for offline operation -->
+
+</head>
+
+<body>
+<svg aria-hidden="true" class="svg-defs" height="0" width="0">
+    <defs>
+        <linearGradient id="score-gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+            <stop offset="0%" stop-color="#38A169"/>
+            <stop offset="100%" stop-color="#B59B55"/>
+        </linearGradient>
+        <linearGradient id="modern-score-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="50%" stop-color="#1d4ed8"/>
+            <stop offset="100%" stop-color="#1e40af"/>
+        </linearGradient>
+    </defs>
+</svg>
+<header class="header">
+    <div class="container">
+        <nav class="nav">
+            <a aria-label="ATS Resume Analyzer - AI Resume Analyzer Home" class="logo" href="#">
+                    <span class="logo-text">
+                        <span class="logo-main-row">
+                            <span class="logo-main">ATS RESUME ANALYZER</span>
+                            <span class="product-badge product-badge--beta">Beta</span>
+                        </span>
+                        <span class="logo-sub">
+                            <svg aria-hidden="true" class="logo-sparkle" fill="currentColor" height="10" viewBox="0 0 24 24" width="10">
+                                <path d="M12 0l2.5 7.5L22 10l-7.5 2.5L12 20l-2.5-7.5L2 10l7.5-2.5z"/>
+                            </svg>
+                            AI Resume Analyzer
+                        </span>
+                    </span>
+            </a>
+            <ul class="nav-links" role="list">
+                <li><a aria-label="Go to AI Resume Analyzer" href="#analyze">Analyzer</a></li>
+                <li><a aria-label="Learn about our privacy policy" href="#privacy">Privacy</a></li>
+                <li><a aria-label="View frequently asked questions" href="#faq">FAQ</a></li>
+            </ul>
+
+            <button aria-controls="mobileNav" aria-expanded="false" aria-label="Toggle mobile menu" class="mobile-menu-btn"
+                    id="mobileMenuBtn" type="button">
+                <span aria-hidden="true">&#9776;</span>
+            </button>
+        </nav>
+    </div>
+    <div aria-label="Mobile navigation menu" class="mobile-nav" id="mobileNav" role="navigation">
+        <ul class="mobile-nav-links" role="list">
+            <li><a aria-label="Go to AI Resume Analyzer" href="#analyze">Analyzer</a></li>
+            <li><a aria-label="Learn about our privacy policy" href="#privacy">Privacy</a></li>
+            <li><a aria-label="View frequently asked questions" href="#faq">FAQ</a></li>
+        </ul>
+    </div>
+</header>
+
+
+<div aria-live="polite" class="consolidated-status-card" id="consolidatedStatus" role="status">
+    <div class="status-main-row">
+        <div class="status-indicator-section">
+            <div aria-hidden="true" class="status-dot loading" id="statusDot"></div>
+            <span class="status-text" id="statusText">Starting...</span>
+        </div>
+    </div>
+    <div class="model-info-row">
+        <div class="model-name-compact" id="modelNameCompact"><span aria-hidden="true">⚡</span> Loading...</div>
+        <button aria-expanded="false" aria-label="Toggle model details" class="model-toggle-compact" id="modelToggleCompact"
+                type="button">
+            <span aria-hidden="true">ⓘ</span>
+        </button>
+    </div>
+    <div class="model-specs-compact" id="modelSpecsCompact">Loading...</div>
+</div>
+
+
+<div id="alertContainer"></div>
+
+
+<div aria-live="polite" class="mobile-status-toast" id="mobileStatusToast" role="status">
+    <span id="mobileStatusMessage">Loading AI Model...</span>
+</div>
+
+
+<section class="hero">
+    <div class="container">
+        <div class="hero-privacy-banner">Maximize Your Resume's ATS Score</div>
+        <h1>Smart Resume Intelligence<br><span class="hero-subtitle">AI-Powered • Secure • Instant</span></h1>
+        <p>Leverage cutting-edge AI technology to optimize your resume for Applicant Tracking Systems. <span
+                class="highlight-text">Your data stays completely private</span> - all analysis runs locally in your browser with zero data transmission.</p>
+        <a class="btn btn-primary-solid hero-cta-button" href="#analyze">
+            <span>🚀</span> Start Analysis
+        </a>
+        <div class="hero-footer-text">
+            100% Free &amp; Open Source • No Registration Required • Built by Suryansh Gupta
+        </div>
+    </div>
+</section>
+
+
+<main class="main-content" id="analyze">
+    <div class="container">
+        <h2 class="section-title">Resume Analysis Dashboard</h2>
+
+
+        <div class="input-panel">
+            <div class="input-panel-tabs">
+                <button aria-controls="resume-view" aria-selected="true" class="main-input-tab active" data-target="resume-view"
+                        role="tab" type="button">
+                    📄 Your Resume
+                </button>
+                <button aria-controls="job-view" aria-selected="false" class="main-input-tab" data-target="job-view"
+                        role="tab" type="button">💼 Job Requirements
+                </button>
+            </div>
+            <div class="input-content-wrapper">
+                <div class="input-content-area" id="resume-view">
+                    <div class="input-tabs">
+                        <button aria-controls="resume-text" aria-selected="true" class="input-tab active" data-section="resume" data-type="text"
+                                role="tab" type="button">
+                            Paste Text
+                        </button>
+                        <button aria-controls="resume-pdf" aria-selected="false" class="input-tab" data-section="resume" data-type="pdf"
+                                role="tab" type="button">
+                            Upload PDF
+                        </button>
+                    </div>
+                    <div class="tab-content" id="resume-text">
+                        <label class="sr-only" for="resume">Resume content</label>
+                        <textarea aria-describedby="resumeCounter" class="main-textarea" id="resume"
+                                  placeholder="Paste your resume content here..." required></textarea>
+                        <div class="char-counter" id="resumeCounter">0/10000</div>
+                        <div class="sample-buttons-container">
+                            <span class="sample-buttons-label">Try a sample:</span>
+                            <button aria-label="Load tech professional sample resume" class="sample-button" data-category="tech" data-type="resume"
+                                    type="button">Tech
+                            </button>
+                            <button aria-label="Load marketing professional sample resume" class="sample-button" data-category="marketing" data-type="resume"
+                                    type="button">Marketing
+                            </button>
+                            <!-- <button aria-label="Load healthcare professional sample resume" class="sample-button" data-category="healthcare" data-type="resume"
+                                    type="button">Healthcare -->
+                            </button>
+                            <button aria-label="Load designer sample resume" class="sample-button" data-category="design" data-type="resume"
+                                    type="button">Design
+                            </button>
+                            <button aria-label="Load finance professional sample resume" class="sample-button" data-category="finance" data-type="resume"
+                                    type="button">Finance
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tab-content hidden" id="resume-pdf">
+                        <div class="upload-area" id="resumeUploadArea">
+                            <h4>Upload Resume PDF</h4>
+                            <p>Drop your file here or click below</p>
+                            <button aria-label="Choose PDF file to upload" class="btn btn-primary-solid file-upload-btn"
+                                    data-target="resumeFileInput" type="button">Choose File
+                            </button>
+                        </div>
+                        <input accept=".pdf" aria-label="Upload resume PDF file" class="hidden" id="resumeFileInput"
+                               type="file">
+                        <div class="hidden file-info-hidden" id="resumeFileInfo">...</div>
+                        <div class="hidden file-info-hidden" id="resumePdfProcessing">...</div>
+                    </div>
+                </div>
+                <div class="input-content-area hidden" id="job-view">
+                    <div class="input-tabs">
+                        <button aria-controls="job-text" aria-selected="true" class="input-tab active" data-section="job" data-type="text"
+                                role="tab" type="button">Paste
+                            Text
+                        </button>
+                        <button aria-controls="job-pdf" aria-selected="false" class="input-tab" data-section="job" data-type="pdf"
+                                role="tab" type="button">Upload
+                            PDF
+                        </button>
+                    </div>
+                    <div class="tab-content" id="job-text">
+                        <label class="sr-only" for="jobDescription">Job description content</label>
+                        <textarea aria-describedby="jobDescriptionCounter" class="main-textarea"
+                                  id="jobDescription" placeholder="Paste the job description here..." required></textarea>
+                        <div class="char-counter" id="jobDescriptionCounter">0/10000</div>
+                        <div class="sample-buttons-container">
+                            <span class="sample-buttons-label">Try a sample:</span>
+                            <button aria-label="Load tech professional sample job description" class="sample-button" data-category="tech" data-type="job"
+                                    type="button">Tech
+                            </button>
+                            <button aria-label="Load marketing professional sample job description" class="sample-button" data-category="marketing" data-type="job"
+                                    type="button">Marketing
+                            </button>
+                            <!-- <button aria-label="Load healthcare professional sample job description" class="sample-button" data-category="healthcare" data-type="job"
+                                    type="button">Healthcare -->
+                            </button>
+                            <button aria-label="Load designer sample job description" class="sample-button" data-category="design" data-type="job"
+                                    type="button">Design
+                            </button>
+                            <button aria-label="Load finance professional sample job description" class="sample-button" data-category="finance" data-type="job"
+                                    type="button">Finance
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tab-content hidden" id="job-pdf">
+                        <div class="upload-area" id="jobUploadArea">
+                            <h4>Upload Job PDF</h4>
+                            <p>Drop your file here or click below</p>
+                            <button aria-label="Choose job description PDF file to upload" class="btn btn-primary-solid file-upload-btn"
+                                    data-target="jobFileInput" type="button">
+                                Choose File
+                            </button>
+                        </div>
+                        <input accept=".pdf" aria-label="Upload job description PDF file" class="hidden" id="jobFileInput"
+                               type="file">
+                        <div class="hidden file-info-hidden" id="jobFileInfo">...</div>
+                        <div class="hidden file-info-hidden" id="jobPdfProcessing">...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analyze-section">
+            <button aria-describedby="analyzeDescription" class="btn btn-primary-solid btn-analyze" disabled id="predictBtn"
+                    type="button">
+                <span aria-hidden="true">⚡</span> Run AI Analysis
+            </button>
+            <div class="sr-only" id="analyzeDescription">Click to start AI analysis of your resume against the job
+                description
+            </div>
+            <div class="analyze-description">
+                Powered by advanced neural networks running 100% locally in your browser. Your data never leaves your device!
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<section class="results-section hidden" id="resultsSection">
+    <div class="container">
+        <header class="results-header">
+            <div class="results-header-content">
+                <h2 class="results-title">Resume Analysis Complete</h2>
+                <p class="results-subtitle">Comprehensive ATS compatibility assessment and personalized
+                    recommendations</p>
+            </div>
+        </header>
+
+        <div class="results-grid">
+
+            <div class="results-dashboard">
+                <div class="score-gauge-container">
+                    <svg height="200" viewBox="0 0 200 200" width="200">
+                        <circle class="score-gauge-track" cx="100" cy="100" r="80" stroke-dasharray="502.65"
+                                stroke-dashoffset="0"/>
+                        <circle class="score-gauge-value" cx="100" cy="100" id="scoreGaugeValue" r="80"
+                                stroke-dasharray="502.65" stroke-dashoffset="502.65"/>
+                    </svg>
+                    <div class="score-value-text">
+                        <span id="scoreValueText">--</span>
+                    </div>
+                </div>
+                <div class="score-label" id="scoreLabel">Ready to Analyze</div>
+                <div class="ai-engine-details" id="aiEngineDetailsScore">
+
+                </div>
+            </div>
+
+
+            <div class="results-action-center">
+                <div class="result-tab-content">
+                    <div class="tab-pane active" id="overview">
+                        <div class="overview-content">
+                            <div class="overview-summary card" id="overviewSummary">
+                                <h4 class="card-title">Analysis Summary</h4>
+                                <div id="analysisWarnings" class="analysis-warnings"></div>
+                                <div class="overview-text" id="overviewText">The analysis of your resume and job
+                                    description will be displayed here.
+                                </div>
+                            </div>
+
+                            <div class="overview-metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h5>Semantic Similarity</h5>
+                                    </div>
+                                    <div class="metric-bar" id="contentMatchBar">
+                                        <div class="metric-fill" id="contentMatchFill"></div>
+                                    </div>
+                                    <div class="metric-text" id="contentMatchText">--% Similar</div>
+                                </div>
+
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h5>Domain Compatibility</h5>
+                                    </div>
+                                    <div class="metric-bar" id="domainBar">
+                                        <div class="metric-fill" id="domainFill"></div>
+                                    </div>
+                                    <div class="metric-text" id="domainText">--% Match</div>
+                                </div>
+
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h5>Skill Depth</h5>
+                                    </div>
+                                    <div class="metric-bar" id="skillBar">
+                                        <div class="metric-fill" id="skillFill"></div>
+                                    </div>
+                                    <div class="metric-text" id="skillText">--% Depth</div>
+                                </div>
+
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h5>Processing Time</h5>
+                                    </div>
+                                    <div class="metric-bar" id="processingTimeBar">
+                                        <div class="metric-fill" id="processingTimeFill"></div>
+                                    </div>
+                                    <div class="metric-text" id="processingTimeText">--s</div>
+                                </div>
+                            </div>
+
+                            <div id="skillAnalysis"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="extra-section privacy-section" id="privacy">
+    <div class="container">
+        <h2 class="section-title">Privacy-First Technology</h2>
+        <div class="privacy-grid">
+            <div class="privacy-feature-card">
+                <div class="privacy-icon">
+                    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                         stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                <h3>Complete Data Privacy</h3>
+                <p>Your resume and job descriptions never leave your device. All AI processing happens locally with zero data collection or transmission.</p>
+            </div>
+            <div class="privacy-feature-card">
+                <div class="privacy-icon">
+                    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                         stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <rect height="14" rx="2" ry="2" width="20" x="2" y="3"></rect>
+                        <line x1="8" x2="16" y1="21" y2="21"></line>
+                        <line x1="12" x2="12" y1="17" y2="21"></line>
+                    </svg>
+                </div>
+                <h3>Browser-Based AI</h3>
+                <p>Advanced transformer models run directly in your browser using WebAssembly technology. No servers, no cloud processing, complete control.</p>
+            </div>
+            <div class="privacy-feature-card">
+                <div class="privacy-icon">
+                    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                         stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="m3 16 4 4 4-4"></path>
+                        <path d="M7 20V4"></path>
+                        <path d="M11 4h10"></path>
+                        <path d="M11 8h7"></path>
+                        <path d="M11 12h4"></path>
+                    </svg>
+                </div>
+                <h3>Zero Data Retention</h3>
+                <p>We don't store, log, or track any information. Your data is processed in memory and completely discarded when you close the browser tab.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<section class="extra-section faq-section-bg" id="faq">
+    <div class="container">
+        <h2 class="section-title">Common Questions</h2>
+        <div class="faq-item">
+            <button aria-controls="faq-answer-1" aria-expanded="false" class="faq-question" type="button">
+                How secure is my data?
+                <span aria-hidden="true" class="faq-icon">+</span>
+            </button>
+            <div aria-hidden="true" class="faq-answer" id="faq-answer-1">Your data is completely secure because it never leaves your device. All AI processing happens locally in your browser using WebAssembly and ONNX Runtime. There are no servers, no data collection, and no tracking. You can even use the tool offline after the initial model download.
+            </div>
+        </div>
+        <div class="faq-item">
+            <button aria-controls="faq-answer-2" aria-expanded="false" class="faq-question" type="button">
+                How does the AI analysis work?
+                <span aria-hidden="true" class="faq-icon">+</span>
+            </button>
+            <div aria-hidden="true" class="faq-answer" id="faq-answer-2">Our system uses advanced neural networks to analyze semantic meaning and context between your resume and job descriptions. Unlike simple keyword matching, our AI understands the relationships between skills, experience, and requirements to provide meaningful compatibility scores.
+            </div>
+        </div>
+        <div class="faq-item">
+            <button aria-controls="faq-answer-3" aria-expanded="false" class="faq-question" type="button">
+                Why do I need ATS optimization?
+                <span aria-hidden="true" class="faq-icon">+</span>
+            </button>
+            <div aria-hidden="true" class="faq-answer" id="faq-answer-3">Most companies use Applicant Tracking Systems (ATS) to screen resumes before they reach human recruiters. These systems scan for specific keywords, skills, and experience. Optimizing your resume helps ensure it passes these automated filters and gets seen by hiring managers.
+            </div>
+        </div>
+        <div class="faq-item">
+            <button aria-controls="faq-answer-4" aria-expanded="false" class="faq-question" type="button">
+                What should my target score be?
+                <span aria-hidden="true" class="faq-icon">+</span>
+            </button>
+            <div aria-hidden="true" class="faq-answer" id="faq-answer-4">Scores above 80% indicate strong alignment with the job requirements. However, use the score as guidance rather than a definitive measure. Focus on the specific recommendations provided to improve weak areas and highlight your most relevant experience.
+            </div>
+        </div>
+        <div class="faq-item">
+            <button aria-controls="faq-answer-5" aria-expanded="false" class="faq-question" type="button">
+                Is there any cost to use this tool?
+                <span aria-hidden="true" class="faq-icon">+</span>
+            </button>
+            <div aria-hidden="true" class="faq-answer" id="faq-answer-5">This tool is completely free to use. It's an open-source project designed to help job seekers improve their applications. All processing happens in your browser at no cost, and we never collect or sell your personal data.
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-main-grid">
+            <div class="footer-brand">
+                <h3>ATS RESUME ANALYZER <span class="product-badge product-badge--beta product-badge--footer">Beta</span></h3>
+                <div class="footer-tagline">
+                    <svg aria-hidden="true" class="footer-sparkle" fill="currentColor" height="12" viewBox="0 0 24 24" width="12">
+                        <path d="M12 0l2.5 7.5L22 10l-7.5 2.5L12 20l-2.5-7.5L2 10l7.5-2.5z"/>
+                    </svg>
+                    AI Resume Analyzer
+                </div>
+                <p>Intelligent AI-powered resume analysis with complete privacy. Built with neural networks.</p>
+                <div class="footer-developer">
+                    <p class="developer-text">Developed by <strong>Suryansh Gupta</strong></p>
+                    <p class="developer-subtitle">Internship Project • 2025</p>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h4>Navigation</h4>
+                <ul class="footer-links">
+                    <li><a href="#analyze">AI Analyzer</a></li>
+                    <li><a href="#privacy">Privacy First</a></li>
+                    <li><a href="#faq">Help & FAQ</a></li>
+                    <li><a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Back to Top</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Technology</h4>
+                <ul class="footer-links">
+                    <li><a href="#" data-modal="model-architecture">AI Models</a></li>
+                    <li><a href="https://onnxruntime.ai/" target="_blank">ONNX Runtime</a></li>
+                    <li><a href="https://huggingface.co/docs/transformers.js" target="_blank">Transformers.js</a></li>
+                    <li><a href="https://webassembly.org/" target="_blank">WebAssembly</a></li>
+                    <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API" target="_blank">Web
+                        Workers</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="footer-bottom-content">
+                <div>
+                    <p>&copy; <span id="copyrightYear"></span> ATS Resume Analyzer &middot; v1.0.0</p>
+                </div>
+                <div class="footer-legal-links">
+                    <a data-modal="about" href="#">About</a>
+                    <a data-modal="privacy" href="#">Privacy Policy</a>
+                    <a data-modal="terms" href="#">Terms of Service</a>
+                    <a data-modal="cookies" href="#">Cookies Policy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-title" id="loadingTitle">Processing Your Resume...</div>
+        <div class="loading-text" id="loadingMessage">Running neural network analysis locally in your browser...</div>
+        <div class="loading-progress">
+            <div class="loading-bar loading-progress-bar" id="loadingProgress"></div>
+        </div>
+        <div class="loading-percent" id="loadingPercent">0%</div>
+    </div>
+</div>
+
+<!-- Legal Documents Modal - Full Page Modern Design -->
+<div class="modal-overlay hidden" id="modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-header-content">
+                <h1 class="modal-title" id="modalTitle">Modal Title</h1>
+                <p class="modal-subtitle">Modal Subtitle</p>
+            </div>
+            <button aria-label="Close modal" class="modal-close" type="button">
+                <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                     stroke-width="2.5" viewBox="0 0 24 24" width="20">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-content" id="modalContent">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PDF.js loaded via npm package in main.ts -->
+<script src="/src/transformers-config.ts" type="module"></script>
+<script src="/src/main.ts" type="module"></script>
+
+</body>
+</html>

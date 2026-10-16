@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalATS Debug - Environment Variables</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        h1 {
+            color: #10b981;
+        }
+        .var {
+            background: #2a2a2a;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #10b981;
+        }
+        .label {
+            color: #888;
+            font-weight: bold;
+        }
+        .value {
+            color: #10b981;
+            word-break: break-all;
+        }
+        .missing {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <h1>LocalATS Environment Debug</h1>
+    <p>This page shows the environment variables injected at build time by Vite.</p>
+
+    <div id="output"></div>
+
+    <script type="module">
+        // Wrap in async function to avoid top-level await (legacy browser compatibility)
+        (async function() {
+            const envVars = {
+                'import.meta.env.MODE': import.meta.env.MODE,
+                'import.meta.env.PROD': import.meta.env.PROD,
+                'import.meta.env.DEV': import.meta.env.DEV,
+                'VITE_MODEL_SOURCE': import.meta.env.VITE_MODEL_SOURCE,
+                'VITE_MODEL_BASE_URL': import.meta.env.VITE_MODEL_BASE_URL,
+                'VITE_SEMANTIC_MODEL_PATH': import.meta.env.VITE_SEMANTIC_MODEL_PATH,
+                'VITE_DOMAIN_MODEL_PATH': import.meta.env.VITE_DOMAIN_MODEL_PATH,
+                'VITE_DEBUG_MODE': import.meta.env.VITE_DEBUG_MODE,
+                'VITE_ENABLE_CACHE': import.meta.env.VITE_ENABLE_CACHE,
+            };
+
+            const output = document.getElementById('output');
+
+            for (const [key, value] of Object.entries(envVars)) {
+                const div = document.createElement('div');
+                div.className = 'var';
+                div.innerHTML = `
+                    <span class="label">${key}:</span>
+                    <span class="${value === undefined ? 'missing' : 'value'}">
+                        ${value === undefined ? 'UNDEFINED' : JSON.stringify(value)}
+                    </span>
+                `;
+                output.appendChild(div);
+            }
+
+            // Also test model config
+            console.log('=== ENVIRONMENT DEBUG ===');
+            console.log('import.meta.env:', import.meta.env);
+
+            // Try to load model config
+            try {
+                const { getModelConfig } = await import('./src/config/model-config.ts');
+                const config = getModelConfig();
+
+                const configDiv = document.createElement('div');
+                configDiv.innerHTML = '<h2 style="color: #10b981; margin-top: 30px;">Model Configuration</h2>';
+                output.appendChild(configDiv);
+
+                const configOutput = document.createElement('pre');
+                configOutput.style.cssText = 'background: #2a2a2a; padding: 15px; overflow-x: auto;';
+                configOutput.textContent = JSON.stringify(config, null, 2);
+                output.appendChild(configOutput);
+
+                console.log('Model Config:', config);
+            } catch (error) {
+                console.error('Failed to load model config:', error);
+
+                const errorDiv = document.createElement('div');
+                errorDiv.innerHTML = '<h2 style="color: #ef4444; margin-top: 30px;">Error Loading Model Config</h2>';
+                output.appendChild(errorDiv);
+
+                const errorOutput = document.createElement('pre');
+                errorOutput.style.cssText = 'background: #2a2a2a; padding: 15px; overflow-x: auto; color: #ef4444;';
+                errorOutput.textContent = error.message || String(error);
+                output.appendChild(errorOutput);
+            }
+        })();
+    </script>
+</body>
+</html>

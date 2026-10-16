@@ -1,0 +1,937 @@
+/*
+ * Results Section - Neo-Brutalist Analysis Display
+ * Bold borders, dramatic shadows, LIGHT backgrounds (no dark teal gradients)
+ */
+
+/* ====================
+   RESULTS SECTION - LIGHT BACKGROUND
+   ==================== */
+.results-section {
+    background: var(--off-white) !important;
+    min-height: 100vh;
+    padding: 60px 0 100px 0 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .results-section {
+        padding: 80px 0 100px 0 !important;
+    }
+}
+
+/* Geometric pattern - subtle on light background */
+.results-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        repeating-linear-gradient(0deg, var(--cosmic-black) 0px, var(--cosmic-black) 1px, transparent 1px, transparent 30px),
+        repeating-linear-gradient(90deg, var(--cosmic-black) 0px, var(--cosmic-black) 1px, transparent 1px, transparent 30px);
+    opacity: 0.02;
+    z-index: 1;
+}
+
+/* ====================
+   RESULTS HEADER
+   ==================== */
+#resultsSection .results-header {
+    text-align: center;
+    margin-bottom: 48px;
+    background: none !important;
+    position: relative;
+    z-index: 2;
+    padding: 0 20px;
+}
+
+@media (min-width: 768px) {
+    #resultsSection .results-header {
+        margin-bottom: 60px;
+    }
+}
+
+#resultsSection .results-title {
+    color: var(--cosmic-black) !important;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 900;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    font-family: var(--font-display);
+}
+
+#resultsSection .results-subtitle {
+    color: #555 !important;
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-weight: 600;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ====================
+   RESULTS GRID
+   ==================== */
+#resultsSection .results-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    align-items: start;
+    position: relative;
+    z-index: 2;
+}
+
+@media (min-width: 1024px) {
+    #resultsSection .results-grid {
+        grid-template-columns: 400px 1fr;
+        gap: 40px;
+        padding: 0 40px;
+    }
+}
+
+/* ====================
+   RESULTS DASHBOARD - NEO-BRUTALIST CARD
+   ==================== */
+#resultsSection .results-dashboard {
+    background: var(--pure-white);
+    border: 4px solid var(--deep-purple);
+    box-shadow: var(--shadow-pink);
+    padding: 32px 24px;
+    text-align: center;
+    position: static;
+    transition: all 0.2s ease;
+}
+
+@media (min-width: 1024px) {
+    #resultsSection .results-dashboard {
+        padding: 40px 32px;
+        position: sticky;
+        top: 100px;
+    }
+}
+
+#resultsSection .results-dashboard:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 10px 10px 0 var(--cyber-pink);
+}
+
+#resultsSection .score-value-text {
+    color: var(--cosmic-black) !important;
+    text-shadow: none;
+    font-weight: 900;
+    font-family: var(--font-display);
+}
+
+#resultsSection .score-label {
+    color: var(--cosmic-black) !important;
+    font-weight: 800;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+#resultsSection .results-dashboard .metric-title {
+    color: var(--cosmic-black) !important;
+    font-weight: 800;
+    font-size: 14px;
+    text-shadow: none;
+    font-family: var(--font-display);
+}
+
+#resultsSection .results-dashboard .metric-value-text {
+    color: var(--cosmic-black) !important;
+    font-weight: 800;
+    font-size: 16px;
+    text-shadow: none;
+}
+
+#resultsSection .score-gauge-value {
+    stroke: var(--deep-purple) !important;
+    stroke-width: 12;
+    filter: none;
+}
+
+#resultsSection .results-dashboard .metric-value-fill {
+    background: var(--deep-purple) !important;
+    box-shadow: none;
+}
+
+.score-gauge-track {
+    fill: none;
+    stroke: #E5E7EB;
+    stroke-width: 12;
+}
+
+/* Score Gauge Additional Styles */
+.score-gauge-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 768px) {
+    .score-gauge-container {
+        width: 220px;
+        height: 220px;
+    }
+}
+
+.score-gauge-value {
+    fill: none;
+    stroke: var(--deep-purple);
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-value-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(40px, 6vw, 56px);
+    font-weight: 900;
+    color: var(--cosmic-black) !important;
+    font-family: var(--font-display);
+    z-index: 10;
+    line-height: 1;
+}
+
+.score-label {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--cosmic-black) !important;
+    margin-bottom: 32px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-display);
+}
+
+/* ====================
+   RESULTS ACTION CENTER
+   ==================== */
+#resultsSection .results-action-center {
+    background: var(--pure-white);
+    border: var(--border-width) solid var(--cosmic-black);
+    box-shadow: var(--shadow-brutal);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+#resultsSection .results-action-center:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 9px 9px 0 var(--cosmic-black);
+}
+
+/* ====================
+   RESULTS TABS - NEO-BRUTALIST
+   ==================== */
+#resultsSection .results-action-center .results-tabs,
+#resultsSection .results-action-center .result-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    background: var(--off-white);
+    border-bottom: var(--border-width) solid var(--cosmic-black);
+}
+
+@media (min-width: 768px) {
+    #resultsSection .results-action-center .results-tabs,
+    #resultsSection .results-action-center .result-tabs {
+        flex-direction: row;
+        gap: 0;
+        padding: 0;
+    }
+}
+
+#resultsSection .results-action-center .result-tab {
+    flex: 1;
+    padding: 16px 20px;
+    font-size: clamp(14px, 2vw, 16px);
+    font-weight: 800;
+    border: 3px solid var(--cosmic-black);
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+@media (min-width: 768px) {
+    #resultsSection .results-action-center .result-tab {
+        border: none;
+        border-right: 3px solid var(--cosmic-black);
+        border-bottom: 4px solid transparent;
+    }
+
+    #resultsSection .results-action-center .result-tab:last-child {
+        border-right: none;
+    }
+}
+
+#resultsSection .results-action-center .result-tab:hover {
+    background: rgba(108, 92, 231, 0.1);
+    color: var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .result-tab.active {
+    background: var(--neon-green);
+    color: var(--cosmic-black);
+    border-bottom-color: var(--cosmic-black);
+}
+
+@media (min-width: 768px) {
+    #resultsSection .results-action-center .result-tab.active {
+        border-bottom: 4px solid var(--cyber-pink);
+    }
+}
+
+#resultsSection .results-action-center .result-tab-content {
+    padding: 24px 20px;
+}
+
+@media (min-width: 768px) {
+    #resultsSection .results-action-center .result-tab-content {
+        padding: 40px;
+    }
+}
+
+#resultsSection .results-action-center .tab-pane.active {
+    animation: V9_fadeIn 0.4s ease;
+}
+
+@keyframes V9_fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ====================
+   OVERVIEW CARDS - NEO-BRUTALIST
+   ==================== */
+#resultsSection .results-action-center .overview-summary {
+    background: var(--pure-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 6px 6px 0 var(--cosmic-black);
+    padding: 24px;
+    margin-bottom: 24px;
+    transition: all 0.2s ease;
+}
+
+@media (min-width: 768px) {
+    #resultsSection .results-action-center .overview-summary {
+        padding: 32px;
+    }
+}
+
+#resultsSection .results-action-center .overview-summary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .overview-summary .card-title {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 900;
+    color: var(--cosmic-black);
+    margin-bottom: 20px;
+}
+
+    #resultsSection .results-action-center .overview-summary .overview-text {
+    font-size: clamp(15px, 2vw, 17px);
+    line-height: 1.8;
+    color: #555;
+    font-weight: 500;
+}
+
+/* Analysis Warnings */
+.analysis-warnings {
+    margin-top: 20px;
+    border-top: 3px solid var(--cosmic-black);
+    padding-top: 20px;
+}
+
+.analysis-warning-item {
+    background: #FF4757; /* Red background for warnings */
+    color: var(--pure-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 4px 4px 0 var(--cosmic-black);
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font-display);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.analysis-warning-item:last-child {
+    margin-bottom: 0;
+}
+
+.analysis-warning-item::before {
+    content: '⚠'; /* Warning icon */
+    font-size: 18px;
+    flex-shrink: 0;
+}
+/* Match Result Header */
+.match-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: var(--off-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 4px 4px 0 var(--cosmic-black);
+}
+
+.match-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    border: 3px solid var(--cosmic-black);
+    font-weight: 900;
+    font-size: clamp(13px, 2vw, 15px);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 4px 4px 0 var(--cosmic-black);
+    transition: all 0.2s ease;
+    font-family: var(--font-display);
+}
+
+.match-badge:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--cosmic-black);
+}
+
+.match-excellent,
+.match-strong {
+    background: var(--neon-green);
+    color: var(--cosmic-black);
+}
+
+.match-good {
+    background: var(--cyber-pink);
+    color: var(--cosmic-black);
+}
+
+.match-fair,
+.match-poor {
+    background: #FF4757;
+    color: var(--pure-white);
+}
+
+.match-score {
+    font-size: clamp(22px, 4vw, 28px);
+    font-weight: 900;
+    color: var(--cosmic-black);
+    font-family: var(--font-display);
+}
+
+.match-description strong {
+    color: var(--cosmic-black);
+    font-weight: 800;
+}
+
+/* Next Steps */
+.next-steps {
+    background: var(--pure-white);
+    border: 3px solid var(--deep-purple);
+    box-shadow: 4px 4px 0 var(--deep-purple);
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.next-steps h5 {
+    font-family: var(--font-display);
+    font-size: clamp(14px, 2vw, 16px);
+    font-weight: 900;
+    color: var(--cosmic-black);
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+}
+
+.next-steps li {
+    color: #555;
+    font-weight: 600;
+}
+
+.next-steps li::before {
+    color: var(--deep-purple);
+}
+
+/* ====================
+   OVERVIEW METRICS - NEO-BRUTALIST
+   ==================== */
+.overview-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 24px;
+    margin-bottom: 0;
+}
+
+@media (min-width: 640px) {
+    .overview-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+#resultsSection .results-action-center .metric-card {
+    background: var(--pure-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 5px 5px 0 var(--cosmic-black);
+    padding: 18px;
+    transition: all 0.2s ease;
+    text-align: center;
+    margin-bottom: 0;
+}
+
+#resultsSection .results-action-center .metric-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .metric-card .metric-header h5 {
+    font-family: var(--font-display);
+    font-size: clamp(13px, 2vw, 15px);
+    font-weight: 800;
+    color: #666;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+#resultsSection .results-action-center .metric-card .metric-bar {
+    width: 100%;
+    height: 10px;
+    background: var(--off-white);
+    border: 3px solid var(--cosmic-black);
+    overflow: hidden;
+    margin: 12px 0;
+}
+
+#resultsSection .results-action-center .metric-card .metric-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--deep-purple), var(--cyber-pink));
+    width: 0%;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#resultsSection .results-action-center .metric-card .metric-text,
+#resultsSection .results-action-center .metric-card .metric-value {
+    font-size: clamp(16px, 3vw, 19px);
+    font-weight: 900;
+    color: var(--cosmic-black);
+    font-family: var(--font-display);
+}
+
+/* ====================
+   TECHNICAL DETAILS - NEO-BRUTALIST
+   ==================== */
+#resultsSection .results-action-center .technical-details-section,
+#resultsSection .results-action-center .recommendation-item {
+    background: var(--pure-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 5px 5px 0 var(--cosmic-black);
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: all 0.2s ease;
+}
+
+#resultsSection .results-action-center .technical-details-section:hover,
+#resultsSection .results-action-center .recommendation-item:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .tech-details-header {
+    padding: 20px 24px;
+    background: var(--off-white);
+    border-bottom: 3px solid var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .tech-details-toggle h4 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(16px, 2.5vw, 20px);
+    font-weight: 900;
+    color: var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .toggle-icon {
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: var(--cosmic-black);
+    background: var(--pure-white);
+    padding: 8px 12px;
+    font-weight: 900;
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 3px 3px 0 var(--cosmic-black);
+    font-family: var(--font-display);
+}
+
+#resultsSection .results-action-center .tech-details-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+    background: var(--cyber-pink);
+}
+
+/* Tech Metrics Grid */
+#resultsSection .results-action-center .tech-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 24px;
+}
+
+@media (min-width: 640px) {
+    #resultsSection .results-action-center .tech-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+#resultsSection .results-action-center .tech-metric-card {
+    background: var(--off-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 3px 3px 0 var(--cosmic-black);
+    padding: 16px;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+#resultsSection .results-action-center .tech-metric-card:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--cosmic-black);
+    background: var(--pure-white);
+}
+
+#resultsSection .results-action-center .tech-metric-card .metric-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 800;
+    color: #666;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+#resultsSection .results-action-center .tech-metric-card .metric-main-value {
+    font-size: clamp(15px, 2.5vw, 18px);
+    font-weight: 900;
+    color: var(--cosmic-black);
+    font-family: var(--font-display);
+}
+
+/* ====================
+   RECOMMENDATIONS - NEO-BRUTALIST
+   ==================== */
+#resultsSection .results-action-center .recommendations-header {
+    padding: 24px 28px 20px;
+    background: var(--off-white);
+    border-bottom: 3px solid var(--cosmic-black);
+    margin: 0;
+}
+
+#resultsSection .results-action-center .recommendations-title {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 3vw, 26px);
+    font-weight: 900;
+    margin: 0;
+    color: var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .recommendations-summary {
+    background: var(--pure-white);
+    padding: 20px 28px;
+    border-bottom: 3px solid var(--off-white);
+    margin: 0;
+}
+
+#resultsSection .results-action-center .stat-item {
+    text-align: center;
+    padding: 12px 20px;
+    background: var(--off-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 3px 3px 0 var(--cosmic-black);
+    transition: all 0.2s ease;
+    min-width: 100px;
+}
+
+#resultsSection .results-action-center .stat-item:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .stat-value {
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 900;
+    color: var(--cosmic-black);
+    font-family: var(--font-display);
+}
+
+#resultsSection .results-action-center .stat-label {
+    font-size: 11px;
+    color: #666;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--font-display);
+}
+
+#resultsSection .results-action-center .recommendations-list {
+    padding: 24px;
+    background: var(--pure-white);
+}
+
+@media (min-width: 768px) {
+    #resultsSection .results-action-center .recommendations-list {
+        padding: 28px;
+    }
+}
+
+#resultsSection .results-action-center .recommendation-item {
+    background: var(--pure-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 5px 5px 0 var(--cosmic-black);
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.2s ease;
+}
+
+@media (min-width: 768px) {
+    #resultsSection .results-action-center .recommendation-item {
+        padding: 24px;
+    }
+}
+
+#resultsSection .results-action-center .recommendation-item:last-child {
+    margin-bottom: 0;
+}
+
+#resultsSection .results-action-center .recommendation-item:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .recommendation-title {
+    font-family: var(--font-display);
+    font-size: clamp(15px, 2.5vw, 18px);
+    font-weight: 900;
+    color: var(--cosmic-black);
+    margin: 0 0 12px 0;
+}
+
+#resultsSection .results-action-center .priority-badge {
+    font-size: 11px;
+    font-weight: 900;
+    padding: 6px 12px;
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 2px 2px 0 var(--cosmic-black);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-display);
+}
+
+#resultsSection .results-action-center .priority-badge.priority-high {
+    background: #FF4757;
+    color: var(--pure-white);
+}
+
+#resultsSection .results-action-center .priority-badge.priority-medium {
+    background: var(--cyber-pink);
+    color: var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .priority-badge.priority-low {
+    background: var(--neon-green);
+    color: var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .recommendation-description {
+    font-size: clamp(14px, 2vw, 16px);
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    font-weight: 500;
+    padding: 16px;
+    background: var(--off-white);
+    border-left: 4px solid var(--deep-purple);
+}
+
+#resultsSection .results-action-center .recommendation-impact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--off-white);
+    border: 3px solid var(--cosmic-black);
+}
+
+#resultsSection .results-action-center .impact-label {
+    color: #666;
+    font-weight: 700;
+    font-family: var(--font-display);
+}
+
+#resultsSection .results-action-center .impact-score {
+    font-weight: 900;
+    color: var(--deep-purple);
+    font-size: 14px;
+    padding: 4px 12px;
+    background: var(--pure-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 2px 2px 0 var(--cosmic-black);
+    font-family: var(--font-display);
+}
+
+/* AI Engine Details */
+.ai-engine-details {
+    margin-top: 24px;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    padding: 16px;
+    background: var(--off-white);
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 4px 4px 0 var(--cosmic-black);
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+
+.ai-engine-details .model-name-display {
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: var(--cosmic-black);
+}
+
+/* ====================
+   SKILL ANALYSIS
+   ==================== */
+#skillAnalysis {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 3px solid var(--cosmic-black);
+}
+
+.skill-analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 640px) {
+    .skill-analysis-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+.skill-list-container {
+    background: var(--off-white);
+    padding: 16px;
+    border: 3px solid var(--cosmic-black);
+    box-shadow: 4px 4px 0 var(--cosmic-black);
+}
+
+.skill-list-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--cosmic-black);
+    margin-bottom: 12px;
+    border-bottom: 3px solid var(--cosmic-black);
+    padding-bottom: 8px;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+}
+
+.skill-item {
+    background: var(--pure-white);
+    color: var(--cosmic-black);
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    border: 3px solid var(--cosmic-black);
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.skill-item.highlight {
+    background: var(--neon-green);
+    color: var(--cosmic-black);
+    border-color: var(--cosmic-black);
+    box-shadow: 3px 3px 0 var(--cosmic-black);
+}
+
+/* ====================
+   RESPONSIVE
+   ==================== */
+@media (max-width: 1023px) {
+    #resultsSection .results-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    #resultsSection .results-dashboard {
+        position: static;
+        margin-bottom: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    #resultsSection {
+        padding: 40px 0 60px 0 !important;
+    }
+
+    #resultsSection .results-grid {
+        padding: 0 16px;
+        gap: 20px;
+    }
+
+    #resultsSection .results-dashboard {
+        padding: 24px 20px;
+    }
+
+    #resultsSection .results-action-center .result-tab-content {
+        padding: 20px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    #resultsSection {
+        padding: 30px 0 50px 0 !important;
+    }
+
+    #resultsSection .results-grid {
+        padding: 0 12px;
+    }
+}

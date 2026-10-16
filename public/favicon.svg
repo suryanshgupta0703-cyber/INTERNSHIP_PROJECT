@@ -1,0 +1,12 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- White background -->
+  <rect width="512" height="512" fill="#FFFFFF"/>
+
+  <!-- Black letter "L" -->
+  <text x="256" y="420"
+        font-family="Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        font-size="380"
+        font-weight="900"
+        fill="#000000"
+        text-anchor="middle">L</text>
+</svg>
