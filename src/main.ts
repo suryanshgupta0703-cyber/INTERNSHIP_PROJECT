@@ -6,10 +6,17 @@
 // Import PDF.js for local PDF processing with proper types
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker
-// Use CDN for reliable deployment across all environments
-const pdfjsVersion = '5.7.284';
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.mjs`;
+// Configure PDF.js worker: prefer local bundled worker for same-origin performance and reliability
+try {
+    const workerUrl = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url
+    ).toString();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+} catch {
+    const pdfjsVersion = '5.7.284';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.mjs`;
+}
 (window as any).pdfjsLib = pdfjsLib;
 
 // Import styles

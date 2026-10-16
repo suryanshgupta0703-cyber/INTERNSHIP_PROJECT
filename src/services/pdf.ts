@@ -18,8 +18,11 @@ import type {
 declare global {
     interface Window {
         pdfjsLib: {
-            getDocument(src: Uint8Array): {
+            getDocument(src: Uint8Array | { data: Uint8Array; cMapUrl?: string; cMapPacked?: boolean; standardFontDataUrl?: string }): {
                 promise: Promise<PDFDocument>;
+            };
+            GlobalWorkerOptions: {
+                workerSrc: string;
             };
         };
     }
@@ -359,6 +362,19 @@ export const extractTextFromPDF = async (
         );
     }
 
+    // Check if worker is configured
+    if (!window.pdfjsLib.GlobalWorkerOptions?.workerSrc) {
+        try {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+                'pdfjs-dist/build/pdf.worker.min.mjs',
+                import.meta.url
+            ).toString();
+        } catch {
+            const pdfjsVersion = '5.7.284';
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.mjs`;
+        }
+    }
+
     return new Promise((resolve, reject) => {
         const fileReader = new FileReader();
 
@@ -372,7 +388,32 @@ export const extractTextFromPDF = async (
                 }
 
                 const typedArray = new Uint8Array(this.result);
-                const pdf = await window.pdfjsLib.getDocument(typedArray).promise;
+                const loadingTask = window.pdfjsLib.getDocument({
+                    data: typedArray,
+                    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/cmaps/',
+                    cMapPacked: true,
+                    standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/standard_fonts/'
+                });
+
+                // Handle loading errors specifically
+                loadingTask.promise.catch((error: any) => {
+                    console.error('PDF.js loading error:', error);
+                    if (error?.message && error.message.includes('worker')) {
+                        reject(new PDFProcessingError(
+                            'PDF.js worker failed to load. This may be due to CORS restrictions. Please try uploading a different PDF or paste the text directly.',
+                            'WORKER_LOAD_ERROR',
+                            { originalError: error }
+                        ));
+                    } else {
+                        reject(new PDFProcessingError(
+                            'Failed to load PDF document',
+                            'PDF_LOAD_ERROR',
+                            { originalError: error }
+                        ));
+                    }
+                });
+
+                const pdf = await loadingTask.promise;
                 let fullText = '';
                 const pageTexts: string[] = [];
 
@@ -382,7 +423,8 @@ export const extractTextFromPDF = async (
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
                         const pageText = textContent.items
-                            .map(item => item.str)
+                            .map((item: any) => (typeof item?.str === 'string' ? item.str : ''))
+                            .filter(Boolean)
                             .join(' ')
                             .trim();
 

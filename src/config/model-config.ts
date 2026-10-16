@@ -60,7 +60,7 @@ export function getModelConfig(): ModelConfig {
 /**
  * Get model paths based on environment
  */
-function getPaths(isLocal: boolean): ModelPaths {
+function getPaths(_isLocal: boolean): ModelPaths {
     // Use Xenova models optimized for browser AI
     // These are specifically designed for Transformers.js and work without CORS issues
     const semanticModelName = import.meta.env.VITE_SEMANTIC_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
