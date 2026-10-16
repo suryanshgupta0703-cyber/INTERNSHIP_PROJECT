@@ -274,66 +274,17 @@ export class ATSEngine {
             console.log(`[ATSEngine] ✅ Domain model loaded (${modelConfig.source})`);
 
             this.emit('statusUpdate', 'Loading scoring...');
-            console.log('[ATSEngine] Starting ONNX and SkillExtractor initialization...');
+            console.log('[ATSEngine] Starting SkillExtractor initialization...');
 
-            // Get ONNX model URLs (dynamic based on environment)
-            const onnxModelUrls = getOnnxModelUrls();
+            // Initialize skill extractor only (skip ONNX models for standard HF models)
+            await this.skillExtractor.initialize();
+            console.log('[ATSEngine] ✅ Skill extractor initialized, using semantic-only scoring');
 
-            console.log(`[ATSEngine] Loading ONNX models (${modelConfig.source}):`, onnxModelUrls);
-
-            try {
-                const [polyFeatures, scoreMapper, neuralMapper] = await Promise.all([
-                    ort.InferenceSession.create(onnxModelUrls.polyFeatures),
-                    ort.InferenceSession.create(onnxModelUrls.scoreMapper),
-                    ort.InferenceSession.create(onnxModelUrls.neuralMapper),
-                    this.skillExtractor.initialize()
-                ]);
-
-                this.polyFeatures = polyFeatures;
-                this.scoreMapper = scoreMapper;
-                this.neuralMapper = neuralMapper;
-
-                console.log(`[ATSEngine] ✅ ONNX models loaded (${modelConfig.source})`);
-            } catch (error) {
-                console.warn(`[ATSEngine] ONNX models not available (${modelConfig.source}), using simplified scoring:`, error);
-                this.polyFeatures = null;
-                this.scoreMapper = null;
-                this.neuralMapper = null;
-
-                // Still initialize skill extractor
-                await this.skillExtractor.initialize();
-                console.log('[ATSEngine] ✅ Skill extractor initialized, using semantic-only scoring');
-            }
-
-            this.emit('statusUpdate', 'Loading ensemble weights...');
-            const weightsUrl = getWeightsUrl();
-            console.log(`[ATSEngine] Loading weights (${modelConfig.source}):`, weightsUrl);
-
-            try {
-                const weightsResponse = await fetch(weightsUrl);
-                if (!weightsResponse.ok) {
-                    console.warn(`[ATSEngine] Weights file not found (${modelConfig.source}), trying alternative paths...`);
-
-                    // Try alternative filename (extract base path and try weights.json)
-                    const baseUrl = weightsUrl.substring(0, weightsUrl.lastIndexOf('/'));
-                    const altResponse = await fetch(`${baseUrl}/weights.json`);
-                    if (altResponse.ok) {
-                        const weightsData = await altResponse.json();
-                        this.ensembleWeights = weightsData.ensemble_weights;
-                        console.log(`[ATSEngine] ✅ Alternative weights loaded (${modelConfig.source})`);
-                    } else {
-                        console.warn('[ATSEngine] No weights file found, using simplified scoring');
-                        this.ensembleWeights = null;
-                    }
-                } else {
-                    const weightsData = await weightsResponse.json();
-                    this.ensembleWeights = weightsData.ensemble_weights;
-                    console.log(`[ATSEngine] ✅ Ensemble weights loaded (${modelConfig.source})`);
-                }
-            } catch (error) {
-                console.warn('[ATSEngine] Failed to load weights, falling back to simplified scoring:', error);
-                this.ensembleWeights = null;
-            }
+            // Set ONNX models to null for standard HF models
+            this.polyFeatures = null;
+            this.scoreMapper = null;
+            this.neuralMapper = null;
+            this.ensembleWeights = null;
 
             this.emit('statusUpdate', 'Models ready');
         } catch (error) {
@@ -401,7 +352,7 @@ export class ATSEngine {
 
         let finalScore: number = 0;
 
-        // --- Incorporate Skill Match --- 
+        // --- Incorporate Skill Match ---
         let skillMatchFactor = 1.0; // Default to no change
         const NO_SKILLS_PENALTY = 30; // Penalty if no skills are found in either resume or job
 
@@ -418,19 +369,14 @@ export class ATSEngine {
             }
         }
 
-        if (this.polyFeatures && this.scoreMapper && this.neuralMapper && this.ensembleWeights) {
-            const atsScore = await this.calculateEnsembleScore(semanticSimilarity);
-            // Conditional domain boost: only apply if domain matches AND skill match is at least moderate
-            if (isSameDomain && skillMatchFactor > 0.3) {
-                finalScore = 50 + (atsScore * 0.5);
-            } else {
-                finalScore = atsScore * 0.5; // No domain boost, or domain mismatch
-            }
+        // Simplified scoring without ensemble models
+        const baseScore = semanticSimilarity * 100;
+
+        // Domain boost: only apply if domain matches AND skill match is at least moderate
+        if (isSameDomain && skillMatchFactor > 0.3) {
+            finalScore = 50 + (baseScore * 0.5);
         } else {
-            const baseScore = semanticSimilarity * 100;
-            if (isSameDomain && skillMatchFactor > 0.3) {
-                finalScore = 50 + (baseScore * 0.5);
-            }
+            finalScore = baseScore;
         }
 
         // Apply a non-linear impact: small match has larger penalty, good match has less impact
