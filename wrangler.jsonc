@@ -1,6 +1,7 @@
 {
     "name": "internship-project",
     "compatibility_date": "2025-10-17",
+    "main": "_worker.js",
     "assets": {
         "directory": "./dist"
     }

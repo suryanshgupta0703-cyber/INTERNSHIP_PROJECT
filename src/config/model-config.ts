@@ -35,6 +35,18 @@ export function getModelConfig(): ModelConfig {
 
     const isLocal = modelSource === 'local';
 
+    // For production on Cloudflare Pages, use the worker proxy as remote host
+    // For local development, use HuggingFace directly
+    let remoteHost: string;
+    let remotePathTemplate: string;
+    if (isProduction) {
+        remoteHost = window.location.origin + '/proxy/hf';
+        remotePathTemplate = '{model}/resolve/main/';
+    } else {
+        remoteHost = isLocal ? '' : (import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co');
+        remotePathTemplate = isLocal ? '' : '{model}/resolve/main/';
+    }
+
     // Base configuration with hardcoded fallbacks for production
     const config: ModelConfig = {
         source: modelSource as 'local' | 'remote',
@@ -42,8 +54,8 @@ export function getModelConfig(): ModelConfig {
         allowRemoteModels: !isLocal,
         // For remote (R2 with HF structure): Use base URL and standard HF path template
         // For local: Empty strings
-        remoteHost: isLocal ? '' : (import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co'),
-        remotePathTemplate: isLocal ? '' : '{model}/resolve/main/',
+        remoteHost,
+        remotePathTemplate,
         paths: getPaths(isLocal)
     };
 
@@ -52,6 +64,7 @@ export function getModelConfig(): ModelConfig {
         allowLocalModels: config.allowLocalModels,
         allowRemoteModels: config.allowRemoteModels,
         remoteHost: config.remoteHost,
+        remotePathTemplate: config.remotePathTemplate,
         semanticModel: config.paths.semanticModel,
         isProduction,
         envSource: import.meta.env.VITE_MODEL_SOURCE
@@ -82,9 +95,15 @@ function getPaths(_isLocal: boolean): ModelPaths {
         domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
     }
 
-    // For remote mode, just return the model name directly - transformers.js will handle the rest
-    // For local mode, would need custom paths, but we're using remote for now
-    const baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
+    // For production on Cloudflare Pages, use the worker proxy to bypass CORS
+    // For local development, use HuggingFace directly
+    let baseUrl: string;
+    if (isProduction) {
+        // Use the Cloudflare Worker proxy
+        baseUrl = window.location.origin + '/proxy/hf';
+    } else {
+        baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
+    }
 
     console.log('[ModelConfig] Model paths:', {
         semanticModelName,
@@ -93,6 +112,8 @@ function getPaths(_isLocal: boolean): ModelPaths {
         isProduction
     });
 
+    // The onnxBasePath and weightsPath are used for custom ONNX models
+    // For standard HF models, transformers.js handles these automatically
     return {
         semanticModel: semanticModelName,
         domainModel: domainModelName,
