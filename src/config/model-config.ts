@@ -32,7 +32,7 @@ export function getModelConfig(): ModelConfig {
 
     const isLocal = modelSource === 'local';
 
-    // Base configuration
+    // Base configuration with hardcoded fallbacks for production
     const config: ModelConfig = {
         source: modelSource as 'local' | 'remote',
         allowLocalModels: isLocal,
@@ -44,6 +44,16 @@ export function getModelConfig(): ModelConfig {
         paths: getPaths(isLocal)
     };
 
+    console.log('[ModelConfig] Configuration:', {
+        source: config.source,
+        allowLocalModels: config.allowLocalModels,
+        allowRemoteModels: config.allowRemoteModels,
+        remoteHost: config.remoteHost,
+        semanticModel: config.paths.semanticModel,
+        isProduction,
+        envSource: import.meta.env.VITE_MODEL_SOURCE
+    });
+
     return config;
 }
 
@@ -51,8 +61,8 @@ export function getModelConfig(): ModelConfig {
  * Get model paths based on environment
  */
 function getPaths(isLocal: boolean): ModelPaths {
-    // Use standard HuggingFace models that are publicly available
-    // Xenova/all-MiniLM-L6-v2 is a widely used sentence transformer model
+    // Use Xenova models optimized for browser AI
+    // These are specifically designed for Transformers.js and work without CORS issues
     const semanticModelName = import.meta.env.VITE_SEMANTIC_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
     const domainModelName = import.meta.env.VITE_DOMAIN_MODEL_PATH || 'Xenova/all-MiniLM-L6-v2';
 
