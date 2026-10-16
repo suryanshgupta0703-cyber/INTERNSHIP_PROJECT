@@ -40,7 +40,9 @@ export function getModelConfig(): ModelConfig {
     let remoteHost: string;
     let remotePathTemplate: string;
     if (isProduction) {
-        remoteHost = window.location.origin + '/proxy/hf';
+        // Use self.location.origin instead of window.location.origin for Web Worker compatibility
+        const origin = typeof window !== 'undefined' ? window.location.origin : self.location.origin;
+        remoteHost = origin + '/proxy/hf';
         remotePathTemplate = '{model}/resolve/main/';
     } else {
         remoteHost = isLocal ? '' : (import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co');
@@ -100,7 +102,9 @@ function getPaths(_isLocal: boolean): ModelPaths {
     let baseUrl: string;
     if (isProduction) {
         // Use the Cloudflare Worker proxy
-        baseUrl = window.location.origin + '/proxy/hf';
+        // Use self.location.origin for Web Worker compatibility
+        const origin = typeof window !== 'undefined' ? window.location.origin : self.location.origin;
+        baseUrl = origin + '/proxy/hf';
     } else {
         baseUrl = import.meta.env.VITE_MODEL_BASE_URL || 'https://huggingface.co';
     }
